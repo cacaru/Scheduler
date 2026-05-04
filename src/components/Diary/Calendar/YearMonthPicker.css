@@ -1,0 +1,128 @@
+.ymcp-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(94, 108, 132, 0.2);
+  backdrop-filter: blur(8px);
+  z-index: 4000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.ymcp-modal-content {
+  background: white;
+  width: 360px;
+  border-radius: 24px;
+  box-shadow: 0 20px 50px rgba(184, 193, 236, 0.2);
+  overflow: hidden;
+  border: 1px solid var(--border);
+  animation: ymcp-fade-in 0.3s cubic-bezier(0.23, 1, 0.32, 1);
+}
+
+@keyframes ymcp-fade-in {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.ymcp-panel-header {
+  padding: 16px 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid var(--border);
+}
+
+.ymcp-header-title-area {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.ymcp-nav-btn {
+  background: var(--accent-light);
+  border: none;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  color: var(--accent);
+  transition: all 0.2s;
+}
+
+.ymcp-nav-btn:hover {
+  background: var(--accent);
+  color: white;
+}
+
+.ymcp-panel-header h3 {
+  margin: 0;
+  font-size: 1.1rem;
+  font-weight: 800;
+  color: var(--text-h);
+  min-width: 120px;
+  text-align: center;
+}
+
+.ymcp-clickable {
+  cursor: pointer;
+  transition: color 0.2s;
+}
+
+.ymcp-clickable:hover {
+  color: var(--accent);
+}
+
+.ymcp-close-btn {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  color: var(--text);
+  padding: 8px;
+  border-radius: 50%;
+  display: flex;
+  transition: all 0.2s;
+}
+
+.ymcp-close-btn:hover {
+  background: var(--accent-light);
+  color: var(--accent);
+}
+
+.ymcp-panel-content {
+  padding: 20px;
+}
+
+.ymcp-picker-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+}
+
+.ymcp-picker-item {
+  padding: 14px 8px;
+  border: 1px solid var(--border);
+  background: white;
+  border-radius: 12px;
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: var(--text);
+  cursor: pointer;
+  transition: all 0.2s;
+  text-align: center;
+}
+
+.ymcp-picker-item:hover {
+  border-color: var(--accent);
+  background: var(--accent-light);
+  color: var(--accent);
+}
+
+.ymcp-picker-item.ymcp-active {
+  background: var(--accent);
+  color: white;
+  border-color: var(--accent);
+  box-shadow: 0 4px 12px rgba(184, 193, 236, 0.4);
+}

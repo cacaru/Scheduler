@@ -1,0 +1,36 @@
+:root {
+  /* Soft Pastel Palette */
+  --bg: #fbfbfc;
+  --surface: #ffffff;
+  --text: #5e6c84;
+  --text-h: #454d66;
+  --border: #f0f2f5;
+  
+  --accent: #b8c1ec;        /* Lavender Blue */
+  --accent-light: #eef1ff;  /* Lavender Sky */
+  --secondary: #fbc2eb;     /* Rose Pink */
+  --success: #a8e6cf;       /* Mint Green */
+  --warning: #ffd3b6;       /* Peach Orange */
+  
+  --shadow-sm: 0 4px 12px rgba(184, 193, 236, 0.08);
+  --shadow-md: 0 12px 30px rgba(184, 193, 236, 0.12);
+  
+  --sans: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  background-color: var(--bg);
+  color: var(--text);
+  font-family: var(--sans);
+  -webkit-font-smoothing: antialiased;
+}
+
+h1, h2, h3, h4 {
+  color: var(--text-h);
+}
+
+button {
+  font-family: var(--sans);
+}
