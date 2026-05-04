@@ -109,7 +109,7 @@
 .side-close-btn:hover {
   background: var(--accent-light);
   color: var(--accent);
-  transform: rotate(90deg);
+  transform: scale(1.2);
 }
 
 .side-menu-body {

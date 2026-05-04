@@ -208,7 +208,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose, currentView, onViewC
           <div className="side-extension-resizer" onMouseDown={startResizing} />
           <div className="side-extension-header">
             <h3>전체 To-do</h3>
-            <button className="side-collapse-btn" onClick={() => { setIsTodoExpanded(false); setSelectedTodoId(null); }} aria-label="Collapse panel">
+            <button className="side-close-btn" onClick={() => { setIsTodoExpanded(false); setSelectedTodoId(null); }} aria-label="Collapse panel">
               <ChevronLeft size={20} />
             </button>
           </div>
