@@ -12,3 +12,6 @@ export const ICONS = [
   { name: 'Notebook', icon: Notebook},
   { name: 'trophy', icon: Trophy}
 ];
+export const ANNIVERSARY_ICONS: Record<string, React.ElementType> = {
+  Gift, Heart, Star, Cake, PartyPopper, Book, Clock, Droplet, Notebook, Trophy 
+}

@@ -1,16 +1,9 @@
 import React from 'react';
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
-import { Trash2, Book, Check, GripVertical, Gift, Heart, Star, Cake, PartyPopper } from 'lucide-react';
+import { Trash2, Book, Check, GripVertical, Gift } from 'lucide-react';
 import { type EntryItem } from '../../../../store/diaryStore';
-
-const ANNIVERSARY_ICONS: Record<string, React.ElementType> = {
-  Gift,
-  Heart,
-  Star,
-  Cake,
-  Party: PartyPopper,
-};
+import { ANNIVERSARY_ICONS } from '../../../../constants/anniversary';
 
 /**
  * SortableEntryCard.tsx

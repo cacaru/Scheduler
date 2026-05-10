@@ -76,6 +76,11 @@
   /* 타이포그래피 변수 */
   --font-body: 'KyoboHandwriting2019', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
   --font-title: 'Cafe24Surround', sans-serif;
+
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
 }
 
 /* 다크 모드 - 감성 새벽 (블랙 & 인디고) */

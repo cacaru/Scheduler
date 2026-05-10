@@ -554,6 +554,19 @@
   color: var(--font-color); /* 글씨 색상은 항상 검은색 */
 }
 
+.detail-main-date {
+  display: flex;
+  align-items: center;
+  justify-self: end;
+  background: var(--accent-light); 
+  padding: clamp(5px, 3vw, 15px); 
+  border-radius: 20px; 
+  color: var(--text);
+  font-size: clamp(0.5rem, 1.2vw, 1rem); 
+  font-family: var(--font-body);
+  margin-bottom: clamp(5px, 3vw, 15px); 
+}
+
 .detail-main-title { 
   font-size: clamp(1.4rem, 2.5vw, 1.75rem); 
   font-weight: 900; 

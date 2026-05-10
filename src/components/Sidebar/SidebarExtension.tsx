@@ -1,9 +1,10 @@
 import React from 'react';
-import { Gift, Heart, Star, Cake, PartyPopper } from 'lucide-react';
+import { Gift } from 'lucide-react';
 import { type EntryItem } from '../../store/diaryStore';
 import { type SidebarPanelType } from '../../hooks/useSidebarUI';
 import SidebarGroupedList from './SidebarGroupedList';
 import SidebarTodoItem from './SidebarTodoItem';
+import { ANNIVERSARY_ICONS } from '../../constants/anniversary';
 
 interface SidebarExtensionProps {
   expandedPanel: SidebarPanelType;
@@ -51,14 +52,6 @@ interface SidebarExtensionProps {
     setSelectedTodoId: (id: string | null) => void;
   };
 }
-
-const ANNIVERSARY_ICONS: Record<string, React.ElementType> = {
-  Gift,
-  Heart,
-  Star,
-  Cake,
-  Party: PartyPopper,
-};
 
 const SidebarExtension: React.FC<SidebarExtensionProps> = ({
   expandedPanel,

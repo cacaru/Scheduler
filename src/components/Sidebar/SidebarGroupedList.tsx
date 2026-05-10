@@ -63,7 +63,7 @@ const SidebarGroupedList = <T extends { id: string, start_date?: string, end_dat
               return (
                 <div key={month} className={`side-month-group ${isExpanded ? 'expanded' : ''}`}>
                   <div className="side-month-header" onClick={() => onToggleMonth(month)}>
-                    <h4 className="side-month-title">{month.replace('-', '년 ')}월</h4>
+                    <h4 style={{margin: '0px'}} className="side-month-title">{month.replace('-', '년 ')}월</h4>
                     <ChevronRight size={14} className={`side-month-arrow ${isExpanded ? 'rotated' : ''}`} />
                   </div>
                   

@@ -4,7 +4,7 @@ import {
   isSameMonth,
   isSameDay,
 } from 'date-fns';
-import { ChevronLeft, ChevronRight, Gift, Heart, Star, Cake, PartyPopper, Book, Clock, Droplet, Notebook, Trophy } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Gift } from 'lucide-react';
 import { 
   DndContext, 
   type DragEndEvent, 
@@ -23,25 +23,13 @@ import DiaryModal from '../Modal/DailyList/DiaryModal';
 import YearMonthPicker from './YearMonthPicker';
 import { useUIStore } from '../../../store/uiStore';
 import './Diary.css';
+import { ANNIVERSARY_ICONS } from '../../../constants/anniversary';
 
 /**
  * DiaryCalendar.tsx
  * 메인 달력 인터페이스를 렌더링하고 관리합니다.
  * 드래그 앤 드롭을 통한 항목 이동, 스와이프를 통한 월 전환, 날짜별 모달 오픈을 처리합니다.
  */
-
-const ANNIVERSARY_ICONS: Record<string, React.ElementType> = {
-  Gift,
-  Heart,
-  Star,
-  Cake,
-  Book,
-  Clock,
-  Droplet,
-  Notebook,
-  Trophy,
-  Party: PartyPopper,
-};
 
 // 드래그 가능한 항목
 const DraggableEntry = React.memo<{activate: boolean, item: EntryItem; date: string }>(({activate, item, date }) => {

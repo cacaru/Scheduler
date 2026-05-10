@@ -16,7 +16,7 @@
 
 .settings-modal-content {
   background: var(--surface);
-  width: clamp(340px, 90%, 450px);
+  width: clamp(340px, 95%, 650px);
   max-height: 90vh;
   border-radius: 32px;
   box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.15);
@@ -134,8 +134,19 @@
 
 
 /* ============================================================
-   4. 토글 스위치 및 테마 그리드
+   4. 레이아웃 제어 및 그리드
    ============================================================ */
+
+.settings-flex-container {
+  display: flex;
+  gap: 32px;
+  align-items: flex-start;
+}
+
+.flex-1 {
+  flex: 1;
+  min-width: 0;
+}
 
 .settings-toggle {
   width: 52px;
@@ -171,11 +182,11 @@
   color: var(--accent);
 }
 
-/* 테마 그리드 */
+/* 테마 그리드 (가로 배치 시 3열) */
 .theme-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 12px;
+  gap: 10px;
 }
 
 .theme-option-card {
@@ -218,8 +229,70 @@
 
 
 /* ============================================================
-   5. 푸터 스타일
+   5. 푸터 및 폰트 스타일
    ============================================================ */
+
+.font-setting-group {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.font-setting-label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--text-muted);
+}
+
+/* 폰트 그리드 (가로 배치 시 2열) */
+.font-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 10px;
+}
+
+.font-option-card {
+  padding: 10px;
+  border-radius: 12px;
+  border: 1px solid var(--sidebar-border);
+  background: white;
+  color: var(--text-main);
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: all 0.2s;
+  text-align: center;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.font-option-card:hover {
+  background: var(--sidebar-item-hover);
+  border-color: var(--accent);
+}
+
+.font-option-card.active {
+  background: var(--accent-light);
+  border-color: var(--accent);
+  color: var(--accent);
+  font-weight: 700;
+}
+
+[data-theme='dark'] .font-option-card {
+  background: #24283b;
+  border-color: #2e2e3e;
+}
+
+[data-theme='dark'] .font-option-card:hover {
+  background: #2e2e3e;
+}
+
+[data-theme='dark'] .font-option-card.active {
+  background: var(--accent-light);
+}
 
 .settings-modal-footer {
   padding: 20px 32px 32px;
@@ -255,8 +328,28 @@
   to { opacity: 1; transform: translateY(0); }
 }
 
+/* 반응형 대응 */
+@media (max-width: 600px) {
+  .settings-flex-container {
+    flex-direction: column;
+    gap: 0;
+  }
+  
+  .theme-grid {
+    grid-template-columns: repeat(4, 1fr);
+    gap: 12px;
+  }
+  
+  .font-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
 @media (max-width: 480px) {
   .theme-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .font-grid {
     grid-template-columns: repeat(2, 1fr);
   }
 }

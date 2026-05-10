@@ -6,6 +6,12 @@
 import { create } from 'zustand';
 
 export type Theme = 'light' | 'dark';
+export type ToastType = 'success' | 'error' | 'info';
+
+interface ToastState {
+  message: string | null;
+  type: ToastType;
+}
 
 interface UIState {
   navigationDate: string | null;
@@ -15,15 +21,21 @@ interface UIState {
   theme_primary: string;
   theme_light: string;
   theme_heavy: string;
+  bodyFont: string;
+  titleFont: string;
   modalCount: number;
+  toast: ToastState;
   navigateAndOpenModal: (date: string, entryId?: string, isEdit?: boolean) => void;
   clearNavigation: () => void;
   toggleTheme: () => void;
   setThemeColors: (primary: string, light: string, heavy: string) => void;
+  setFonts: (body: string, title: string) => void;
   setModalOpen: (isOpen: boolean) => void;
+  showToast: (message: string, type?: ToastType) => void;
+  clearToast: () => void;
 }
 
-export const useUIStore = create<UIState>((set) => ({
+export const useUIStore = create<UIState>((set, get) => ({
   navigationDate: null,
   navigationEntryId: null,
   isEditMode: false,
@@ -31,7 +43,10 @@ export const useUIStore = create<UIState>((set) => ({
   theme_primary: localStorage.getItem('theme_primary') || '#e2d5f9',
   theme_light: localStorage.getItem('theme_light') || '#e2d5f925',
   theme_heavy: localStorage.getItem('theme_heavy') || '#ac9ec4',
+  bodyFont: localStorage.getItem('bodyFont') || 'KyoboHandwriting2019',
+  titleFont: localStorage.getItem('titleFont') || 'Cafe24Surround',
   modalCount: 0,
+  toast: { message: null, type: 'info' },
   navigateAndOpenModal: (date, entryId, isEdit) => set({ 
     navigationDate: date, 
     navigationEntryId: entryId || null,
@@ -57,6 +72,13 @@ export const useUIStore = create<UIState>((set) => ({
     document.documentElement.style.setProperty('--accent-heavy', heavy);
     set({ theme_primary: primary, theme_light: light, theme_heavy: heavy });
   },
+  setFonts: (body, title) => {
+    localStorage.setItem('bodyFont', body);
+    localStorage.setItem('titleFont', title);
+    document.documentElement.style.setProperty('--font-body', `"${body}", -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif`);
+    document.documentElement.style.setProperty('--font-title', `"${title}", sans-serif`);
+    set({ bodyFont: body, titleFont: title });
+  },
   setModalOpen: (isOpen) => set((state) => {
     const newCount = isOpen ? state.modalCount + 1 : Math.max(0, state.modalCount - 1);
     
@@ -70,17 +92,28 @@ export const useUIStore = create<UIState>((set) => ({
     
     return { modalCount: newCount };
   }),
+  showToast: (message, type = 'info') => {
+    set({ toast: { message, type } });
+    setTimeout(() => {
+      get().clearToast();
+    }, 3000);
+  },
+  clearToast: () => set({ toast: { message: null, type: 'info' } }),
 }));
 
-// 초기 테마 및 색상 즉시 적용 (FOUC 방지)
+// 초기 테마 및 색상, 폰트 즉시 적용 (FOUC 방지)
 if (typeof document !== 'undefined') {
   const savedTheme = localStorage.getItem('theme') || 'light';
   const savedPrimary = localStorage.getItem('theme_primary') || '#e2d5f9';
   const savedLight = localStorage.getItem('theme_light') || '#e2d5f925';
   const savedHeavy = localStorage.getItem('theme_heavy') || '#ac9ec4';
+  const savedBodyFont = localStorage.getItem('bodyFont') || 'KyoboHandwriting2019';
+  const savedTitleFont = localStorage.getItem('titleFont') || 'Cafe24Surround';
   
   document.documentElement.setAttribute('data-theme', savedTheme);
   document.documentElement.style.setProperty('--accent', savedPrimary);
   document.documentElement.style.setProperty('--accent-light', savedLight);
   document.documentElement.style.setProperty('--accent-heavy', savedHeavy);
+  document.documentElement.style.setProperty('--font-body', `"${savedBodyFont}", -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif`);
+  document.documentElement.style.setProperty('--font-title', `"${savedTitleFont}", sans-serif`);
 }

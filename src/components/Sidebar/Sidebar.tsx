@@ -1,11 +1,11 @@
 import React, { useState, useCallback, useEffect } from 'react';
 import { type EntryItem } from '../../store/diaryStore';
-import { Calendar, X, CheckCircle, Book, Gift, LogOut, ChevronRight, Heart, Star, Cake, MapPin, Settings } from 'lucide-react';
+import { Calendar, X, CheckCircle, Book, Gift, LogOut, ChevronRight, MapPin, Settings } from 'lucide-react';
 import { useSidebarTodo } from '../../hooks/useSidebarTodo';
 import SettingsModal from './SettingsModal';
 import SidebarTodoItem from './SidebarTodoItem';
 import SidebarGroupedList from './SidebarGroupedList';
-import TodoDetailModal from './TodoDetailModal';
+import SideDetailModal from './SideDetailModal';
 import { useSidebarUI } from '../../hooks/useSidebarUI';
 import { useSidebarDiary } from '../../hooks/useSidebarDiary';
 import { useSidebarAnniversary } from '../../hooks/useSidebarAnniversary';
@@ -13,14 +13,7 @@ import { useUIStore } from '../../store/uiStore';
 import { type ViewType } from '../../App';
 import { supabase } from '../../utils/supabase';
 import './Sidebar.css';
-
-const ANNIVERSARY_ICONS: Record<string, React.ElementType> = {
-  Gift,
-  Heart,
-  Star,
-  Cake,
-  Party: Gift,
-};
+import { ANNIVERSARY_ICONS } from '../../constants/anniversary';
 
 interface SidebarProps {
   isOpen: boolean;
@@ -66,6 +59,9 @@ const Sidebar: React.FC<SidebarProps> = ({
     if (isOpen) {
       setModalOpen(true);
       return () => setModalOpen(false);
+    } else {
+      // 사이드바가 닫힐 때 상세 모달도 닫기
+      setSelectedItem(null);
     }
   }, [isOpen, setModalOpen]);
 
@@ -295,7 +291,7 @@ const Sidebar: React.FC<SidebarProps> = ({
 
       {/* 공통 상세 미리보기 모달 */}
       {selectedItem && (
-        <TodoDetailModal
+        <SideDetailModal
           item={selectedItem}
           date={selectedDate}
           onClose={() => setSelectedItem(null)}

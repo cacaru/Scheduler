@@ -1,6 +1,7 @@
 import { useState, useCallback, useEffect } from 'react';
 import { useDiaryStore, type EntryType, type EntryItem } from '../../../../store/diaryStore';
 import { PRESET_COLORS } from '../../../../constants/colors';
+import { useUIStore } from '../../../../store/uiStore';
 
 
 /**
@@ -67,7 +68,10 @@ export const useDiaryForm = ({ initialDate, onClose }: UseDiaryFormProps) => {
   }, [initialDate]);
 
   const handleAddOrUpdate = useCallback(() => {
-    if (!title.trim()) return;
+    if (!title.trim()) {
+      useUIStore.getState().showToast('제목을 입력해주세요.', 'error');
+      return;
+    }
 
     const itemData: any = {
       type,

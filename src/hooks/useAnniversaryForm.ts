@@ -3,6 +3,8 @@ import { format, parseISO } from 'date-fns';
 import { useDiaryStore, type EntryItem } from '../store/diaryStore';
 import { ANNI_COLORS as COLORS } from '../constants/colors';
 
+import { useUIStore } from '../store/uiStore';
+
 interface UseAnniversaryFormProps {
   isOpen: boolean;
   initialDate?: string;
@@ -22,6 +24,7 @@ export const useAnniversaryForm = ({ isOpen, initialDate, onClose }: UseAnnivers
   const [isLoading, setIsLoading] = useState(false);
 
   const addItem = useDiaryStore(state => state.addItem);
+  const showToast = useUIStore(state => state.showToast);
 
   // 모달이 열릴 때 초기 날짜 동기화
   useEffect(() => {
@@ -34,7 +37,11 @@ export const useAnniversaryForm = ({ isOpen, initialDate, onClose }: UseAnnivers
 
   const handleSubmit = useCallback(async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!title || !date) return;
+    if (!title.trim()) {
+      showToast('제목을 입력해주세요.', 'error');
+      return;
+    }
+    if (!date) return;
 
     setIsLoading(true);
     try {
@@ -58,11 +65,11 @@ export const useAnniversaryForm = ({ isOpen, initialDate, onClose }: UseAnnivers
       setShowMap(false);
     } catch (error: any) {
       console.error('Failed to add anniversary:', error);
-      alert('기념일 저장에 실패했습니다: ' + (error.message || '알 수 없는 에러'));
+      // slice에서 이미 에러 토스트를 보여주므로 여기서는 생략하거나 추가 정보만 제공
     } finally {
       setIsLoading(false);
     }
-  }, [title, date, content, selectedColor, selectedLocation, isRecurring, selectedIcon, addItem, onClose]);
+  }, [title, date, content, selectedColor, selectedLocation, isRecurring, selectedIcon, addItem, onClose, showToast]);
 
   return {
     state: {

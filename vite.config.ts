@@ -26,10 +26,10 @@ export default defineConfig(({ mode }) => {
       },
     ],
     build : {
-    rollupOptions: {
-      output: {
-        manualChunks: (id) => {
-          if (id.includes('node_modules')) {
+      rollupOptions: {
+        output: {
+          manualChunks: (id) => {
+            if (id.includes('node_modules')) {
               // 안전하게 모듈 이름을 추출
               const module = id.toString().split('node_modules/')[1].split('/')[0];
               

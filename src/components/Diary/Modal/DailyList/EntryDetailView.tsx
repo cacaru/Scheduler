@@ -1,21 +1,14 @@
 import React from 'react';
-import { X as CloseIcon, MapPin, Edit2, Book, Check, Gift, Heart, Star, Cake, PartyPopper } from 'lucide-react';
+import { X as CloseIcon, MapPin, Edit2, Book, Check, Gift } from 'lucide-react';
 import { Map, MapMarker } from 'react-kakao-maps-sdk';
 import { type EntryItem } from '../../../../store/diaryStore';
-
+import { Calendar } from 'lucide-react';
+import { ANNIVERSARY_ICONS } from '../../../../constants/anniversary';
 /**
  * EntryDetailView.tsx
  * 선택된 일기 또는 할 일의 상세 내용을 보여주는 독립 패널입니다.
  * 내용 텍스트와 등록된 위치 정보를 카카오 지도로 함께 표시합니다.
  */
-
-const ANNIVERSARY_ICONS: Record<string, React.ElementType> = {
-  Gift,
-  Heart,
-  Star,
-  Cake,
-  Party: PartyPopper,
-};
 
 interface EntryDetailViewProps {
   item: EntryItem | null; // null 허용으로 변경 (항상 렌더링을 위해)
@@ -74,6 +67,18 @@ const EntryDetailView: React.FC<EntryDetailViewProps> = ({ item, isOpen, onClose
               {renderTypeBadge()}
             </div>
             <h2 className="detail-main-title">{item.title}</h2>
+            { item.type === 'todo' && (
+              <div className="detail-main-date">
+                <Calendar style={{ paddingRight: '7px' }} size={16} />
+                <div className="detail-main-todo-date">
+                  {item.start_date} 
+                  {item.end_date === item.start_date ? '': ' ~ ' + item.end_date}
+                </div>    
+              </div>
+              
+              )
+            }
+            
             <div className="detail-text-box">
               {item.content || "기록된 내용이 없습니다."}
             </div>

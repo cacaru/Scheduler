@@ -4,6 +4,7 @@ import DiaryCalendar from './components/Diary/Calendar/DiaryCalendar'
 import Sidebar from './components/Sidebar/Sidebar'
 import MainMapView from './components/Map/MainMapView'
 import AuthModal from './components/Auth/AuthModal'
+import Toast from './components/common/Toast'
 import { Menu } from 'lucide-react'
 import { supabase } from './utils/supabase'
 import { useAuthStore } from './store/authStore'
@@ -73,6 +74,7 @@ function App() {
   return (
     <div className="app-layout">
       {!user && <AuthModal />}
+      <Toast />
       
       <div className="app-container">
         <header className="app-header">

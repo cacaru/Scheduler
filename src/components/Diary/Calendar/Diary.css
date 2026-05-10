@@ -12,7 +12,6 @@
   flex-direction: column;
   box-sizing: border-box;
   background: var(--bg);
-  user-select: none;
   flex: 1;
 }
 
