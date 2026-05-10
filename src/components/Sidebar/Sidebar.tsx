@@ -32,7 +32,6 @@ const Sidebar: React.FC<SidebarProps> = ({
     expandedPanel, 
     extensionWidth, 
     isResizing,
-    currentTheme,
     expandedTodoMonths,
     expandedDiaryMonths,
     expandedAnniMonths,
@@ -317,8 +316,6 @@ const Sidebar: React.FC<SidebarProps> = ({
       <SettingsModal
         isOpen={isSettingsModalOpen}
         onClose={() => setIsSettingsModalOpen(false)}
-        currentTheme={currentTheme}
-        onChangeTheme={actions.changeTheme}
       />
     </>
   );

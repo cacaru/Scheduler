@@ -7,8 +7,6 @@ import './SettingsModal.css';
 interface SettingsModalProps {
   isOpen: boolean;
   onClose: () => void;
-  currentTheme: string;
-  onChangeTheme: (primary: string, light: string, heavy: string) => void;
 }
 
 const FONTS = [
@@ -22,9 +20,7 @@ const FONTS = [
 
 const SettingsModal: React.FC<SettingsModalProps> = ({
   isOpen,
-  onClose,
-  currentTheme,
-  onChangeTheme
+  onClose
 }) => {
   const { 
     theme: globalTheme, 
@@ -96,7 +92,7 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
 
   // 확인 시 전역 상태 및 로컬스토리지 업데이트
   const handleConfirm = () => {
-    // 테마가 바뀌었을 때만 토글 (globalToggleTheme는 내부적으로 토글 방식이므로 주의 필요)
+    // 테마가 바뀌었을 때만 토글
     if (tempTheme !== globalTheme) {
       globalToggleTheme();
     }
