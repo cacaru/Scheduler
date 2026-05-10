@@ -1,128 +1,158 @@
+/* ============================================================
+   1. 통합형 모달 컨테이너 (INTEGRATED MODAL)
+   ============================================================ */
+
 .ymcp-modal-overlay {
   position: fixed;
   inset: 0;
-  background: rgba(94, 108, 132, 0.2);
+  background: rgba(15, 23, 42, 0.3);
   backdrop-filter: blur(8px);
-  z-index: 4000;
+  z-index: 5000;
   display: flex;
   align-items: center;
   justify-content: center;
 }
 
 .ymcp-modal-content {
-  background: white;
-  width: 360px;
-  border-radius: 24px;
-  box-shadow: 0 20px 50px rgba(184, 193, 236, 0.2);
-  overflow: hidden;
+  background: var(--surface);
+  width: 380px;
+  border-radius: 32px;
+  box-shadow: 0 30px 70px rgba(0, 0, 0, 0.25);
+  display: flex;
+  flex-direction: column;
   border: 1px solid var(--border);
-  animation: ymcp-fade-in 0.3s cubic-bezier(0.23, 1, 0.32, 1);
+  animation: ymcp-pop 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+  padding: 10px 0;
 }
 
-@keyframes ymcp-fade-in {
-  from { opacity: 0; transform: translateY(10px); }
-  to { opacity: 1; transform: translateY(0); }
+@keyframes ymcp-pop {
+  from { opacity: 0; transform: scale(0.95); }
+  to { opacity: 1; transform: scale(1); }
 }
 
-.ymcp-panel-header {
-  padding: 16px 20px;
+
+/* ============================================================
+   2. 섹션 헤더 및 구분선 (SECTION HEADERS & DIVIDER)
+   ============================================================ */
+
+.ymcp-section-header {
+  padding: 12px 24px;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  border-bottom: 1px solid var(--border);
 }
 
-.ymcp-header-title-area {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-}
-
-.ymcp-nav-btn {
-  background: var(--accent-light);
-  border: none;
-  width: 32px;
-  height: 32px;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  color: var(--accent);
-  transition: all 0.2s;
-}
-
-.ymcp-nav-btn:hover {
-  background: var(--accent);
-  color: white;
-}
-
-.ymcp-panel-header h3 {
+.ymcp-section-header h4 {
   margin: 0;
-  font-size: 1.1rem;
-  font-weight: 800;
+  font-size: 0.95rem;
+  font-weight: 900;
   color: var(--text-h);
-  min-width: 120px;
-  text-align: center;
+  font-family: var(--font-body);
+  letter-spacing: -0.01em;
 }
 
-.ymcp-clickable {
-  cursor: pointer;
-  transition: color 0.2s;
+.ymcp-divider {
+  height: 1px;
+  background: var(--border);
+  margin: 8px 24px;
 }
 
-.ymcp-clickable:hover {
-  color: var(--accent);
-}
 
-.ymcp-close-btn {
-  background: transparent;
-  border: none;
-  cursor: pointer;
-  color: var(--text);
-  padding: 8px;
-  border-radius: 50%;
-  display: flex;
-  transition: all 0.2s;
-}
+/* ============================================================
+   3. 그리드 및 아이템 스타일 (PICKER GRIDS)
+   ============================================================ */
 
-.ymcp-close-btn:hover {
-  background: var(--accent-light);
-  color: var(--accent);
-}
-
-.ymcp-panel-content {
-  padding: 20px;
+.ymcp-section-content {
+  padding: 0 24px 12px;
 }
 
 .ymcp-picker-grid {
   display: grid;
+  gap: 8px;
+}
+
+/* 연도 그리드: 4열 구성으로 세로 공간 절약 */
+.ymcp-picker-grid.years {
+  grid-template-columns: repeat(4, 1fr);
+}
+
+/* 월 그리드: 3열 구성으로 가독성 확보 */
+.ymcp-picker-grid.months {
   grid-template-columns: repeat(3, 1fr);
-  gap: 12px;
 }
 
 .ymcp-picker-item {
-  padding: 14px 8px;
+  padding: 10px 4px;
   border: 1px solid var(--border);
-  background: white;
-  border-radius: 12px;
-  font-size: 0.9rem;
-  font-weight: 700;
+  background: var(--bg);
+  border-radius: 14px;
+  font-size: 0.85rem;
+  font-weight: 800;
   color: var(--text);
   cursor: pointer;
-  transition: all 0.2s;
-  text-align: center;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-body);
 }
 
 .ymcp-picker-item:hover {
   border-color: var(--accent);
-  background: var(--accent-light);
   color: var(--accent);
+  background: var(--surface);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
 }
 
 .ymcp-picker-item.ymcp-active {
   background: var(--accent);
   color: white;
   border-color: var(--accent);
-  box-shadow: 0 4px 12px rgba(184, 193, 236, 0.4);
+  box-shadow: 0 8px 20px rgba(184, 193, 236, 0.4);
+}
+
+
+/* ============================================================
+   4. 버튼 및 내비게이션 (CONTROLS)
+   ============================================================ */
+
+.ymcp-mini-nav-btn {
+  background: var(--bg);
+  border: 1px solid var(--border);
+  width: 32px;
+  height: 32px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  color: var(--text-muted);
+  transition: all 0.2s;
+}
+
+.ymcp-mini-nav-btn:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+  background: var(--accent-light);
+}
+
+.ymcp-close-btn {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  color: var(--text-muted);
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+}
+
+.ymcp-close-btn:hover {
+  background: var(--bg);
+  color: var(--text-h);
+  transform: rotate(90deg);
 }

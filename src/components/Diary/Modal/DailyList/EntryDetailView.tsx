@@ -1,13 +1,21 @@
 import React from 'react';
-import { X as CloseIcon, MapPin, Edit2 } from 'lucide-react';
+import { X as CloseIcon, MapPin, Edit2, Book, Check, Gift, Heart, Star, Cake, PartyPopper } from 'lucide-react';
 import { Map, MapMarker } from 'react-kakao-maps-sdk';
-import { type EntryItem } from '../../../store/diaryStore';
+import { type EntryItem } from '../../../../store/diaryStore';
 
 /**
  * EntryDetailView.tsx
  * 선택된 일기 또는 할 일의 상세 내용을 보여주는 독립 패널입니다.
  * 내용 텍스트와 등록된 위치 정보를 카카오 지도로 함께 표시합니다.
  */
+
+const ANNIVERSARY_ICONS: Record<string, React.ElementType> = {
+  Gift,
+  Heart,
+  Star,
+  Cake,
+  Party: PartyPopper,
+};
 
 interface EntryDetailViewProps {
   item: EntryItem | null; // null 허용으로 변경 (항상 렌더링을 위해)
@@ -17,6 +25,38 @@ interface EntryDetailViewProps {
 }
 
 const EntryDetailView: React.FC<EntryDetailViewProps> = ({ item, isOpen, onClose, onEdit }) => {
+  const itemColor = item?.color || '#cbd5e0';
+  
+  const renderTypeBadge = () => {
+    if (!item) return null;
+    
+    let Icon: React.ElementType = Book;
+    let label = '일기';
+    
+    if (item.type === 'todo') {
+      Icon = Check;
+      label = '할 일';
+    } else if (item.type === 'anniversary') {
+      Icon = ANNIVERSARY_ICONS[item.icon || 'Gift'] || Gift;
+      label = '기념일';
+    }
+    
+    return (
+      <div 
+        className="detail-type-badge" 
+        style={{ 
+          borderColor: itemColor,
+          boxShadow: `0 0 12px ${itemColor}40`,
+          backgroundColor: `${itemColor}15`,
+          color: 'black' 
+        }}
+      >
+        <Icon size={14} strokeWidth={3} style={{ color: itemColor }} />
+        <span>{label}</span>
+      </div>
+    );
+  };
+
   return (
     <div 
       className={`independent-modal detail-modal ${isOpen ? 'is-open' : ''}`}
@@ -30,6 +70,9 @@ const EntryDetailView: React.FC<EntryDetailViewProps> = ({ item, isOpen, onClose
             <div style={{ width: 40 }} />
           </div>
           <div className="modal-body scrollable">
+            <div className="detail-main-title">
+              {renderTypeBadge()}
+            </div>
             <h2 className="detail-main-title">{item.title}</h2>
             <div className="detail-text-box">
               {item.content || "기록된 내용이 없습니다."}

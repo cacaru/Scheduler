@@ -1,9 +1,11 @@
-import React, { useMemo, useState } from 'react';
+import React, { useMemo, useState, useCallback } from 'react';
 import { Map, MapMarker, CustomOverlayMap } from 'react-kakao-maps-sdk';
 import { useDiaryStore, type EntryItem } from '../../store/diaryStore';
 import { MapPin, Calendar, CheckCircle, Circle } from 'lucide-react';
 import { formatDateWithDay } from '../../utils/dateUtils';
 import MyLocationButton from './MyLocationButton';
+import { type ViewType } from '../../App';
+import { useUIStore } from '../../store/uiStore';
 
 /**
  * MainMapView.tsx
@@ -11,9 +13,23 @@ import MyLocationButton from './MyLocationButton';
  * 내 위치 찾기 기능을 포함하며, 마커 클릭 시 해당 항목의 요약 정보를 툴팁으로 보여줍니다.
  */
 
-const MainMapView: React.FC = () => {
-  const entries = useDiaryStore((state) => state.entries);
+interface MainMapProps {
+  onViewChange: (view: ViewType) => void;
+}
+
+const MainMapView: React.FC<MainMapProps> = ({ 
+  onViewChange
+}) => {
+  const entries = useDiaryStore((state) => state.oriItem);
   const [selectedItem, setSelectedItem] = useState<{item: EntryItem, date: string} | null>(null);
+
+  const navigateAndOpenModal = useUIStore(state => state.navigateAndOpenModal);
+
+  const handleNavigateFromMap = useCallback((date: string, id: string, isEdit: boolean) => {
+      onViewChange('diary');
+      navigateAndOpenModal(date, id, isEdit);
+      setSelectedItem(null);
+    }, [navigateAndOpenModal]);
 
   // 위치 정보가 있는 모든 항목 추출
   const itemsWithLocation = useMemo(() => {
@@ -57,22 +73,25 @@ const MainMapView: React.FC = () => {
             {selectedItem?.item.id === item.id && (
               <CustomOverlayMap position={{ lat: item.location!.lat, lng: item.location!.lng }} yAnchor={1.2}>
                 <div className="map-tooltip" style={{ 
+                  cursor: 'pointer',
                   background: 'white', 
                   padding: '12px', 
                   borderRadius: '12px', 
                   boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
                   minWidth: '180px',
                   border: `2px solid ${item.color || 'var(--accent)'}`
-                }}>
+                  }}
+                  onClick={() => handleNavigateFromMap(date, item.id, false)}
+                >
                   <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px', borderBottom: '1px solid #eee', paddingBottom: '4px' }}>
-                    <span style={{ fontSize: '0.7rem', fontWeight: 700, color: 'var(--accent)' }}>{formatDateWithDay(date)}</span>
-                    <button onClick={() => setSelectedItem(null)} style={{ border: 'none', background: 'none', cursor: 'pointer' }}><Calendar size={12} /></button>
+                    <span style={{ fontSize: '1rem', fontWeight: 700, color: 'var(--accent)' }}>{formatDateWithDay(date)}</span>
+                    <button onClick={() => setSelectedItem(null)} style={{ border: 'none', background: 'none', cursor: 'pointer' }}><Calendar size={16} /></button>
                   </div>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                    {item.completed ? <CheckCircle size={14} color="#38a169" /> : <Circle size={14} color="#cbd5e0" />}
-                    <span style={{ fontWeight: 600, fontSize: '0.9rem' }}>{item.title}</span>
+                    {item.completed ? <CheckCircle size={16} color="#38a169" /> : <Circle size={14} color="#cbd5e0" />}
+                    <span style={{ fontWeight: 600, fontSize: '1rem' }}>{item.title}</span>
                   </div>
-                  <div style={{ fontSize: '0.75rem', color: '#666', marginTop: '4px', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                  <div style={{ fontSize: '1rem', color: '#666', marginTop: '4px', display: 'flex', alignItems: 'center', gap: '4px' }}>
                     <MapPin size={10} />
                     {item.location!.name}
                   </div>

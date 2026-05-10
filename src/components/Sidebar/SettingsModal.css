@@ -1,0 +1,262 @@
+/* ============================================================
+   1. 설정 모달 오버레이 및 컨테이너
+   ============================================================ */
+
+.settings-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.3);
+  backdrop-filter: blur(8px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 6000;
+  animation: settingsFadeIn 0.3s ease-out;
+}
+
+.settings-modal-content {
+  background: var(--surface);
+  width: clamp(340px, 90%, 450px);
+  max-height: 90vh;
+  border-radius: 32px;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.15);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  border: 1px solid var(--border);
+  animation: settingsSlideUp 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+
+/* ============================================================
+   2. 헤더 스타일
+   ============================================================ */
+
+.settings-modal-header {
+  padding: 24px 32px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid var(--border);
+}
+
+.settings-title {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.title-icon {
+  color: var(--accent);
+}
+
+.settings-modal-header h3 {
+  margin: 0;
+  font-size: 1.2rem;
+  font-weight: 800;
+  color: var(--text-h);
+}
+
+.settings-close-btn {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: none;
+  background: var(--bg);
+  color: var(--text-muted);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.settings-close-btn:hover {
+  background: var(--border);
+  color: var(--text-h);
+  transform: rotate(90deg);
+}
+
+
+/* ============================================================
+   3. 본문 및 섹션 스타일
+   ============================================================ */
+
+.settings-modal-body {
+  padding: 24px 32px;
+  flex: 1;
+  overflow-y: auto;
+}
+
+.settings-section {
+  margin-bottom: 32px;
+}
+
+.section-label {
+  font-size: 0.8rem;
+  font-weight: 900;
+  color: var(--accent);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  margin-bottom: 16px;
+}
+
+.settings-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: var(--bg);
+  padding: 20px;
+  border-radius: 20px;
+  border: 1px solid var(--border);
+}
+
+.setting-info {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.setting-name {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-weight: 800;
+  color: var(--text-h);
+  font-size: 0.95rem;
+}
+
+.setting-desc {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  font-weight: 600;
+}
+
+
+/* ============================================================
+   4. 토글 스위치 및 테마 그리드
+   ============================================================ */
+
+.settings-toggle {
+  width: 52px;
+  height: 28px;
+  border-radius: 50px;
+  background: var(--border);
+  border: none;
+  position: relative;
+  cursor: pointer;
+  transition: background 0.3s;
+  padding: 4px;
+}
+
+.settings-toggle.active {
+  background: var(--accent);
+}
+
+.toggle-knob {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+  color: var(--text-muted);
+  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+
+.settings-toggle.active .toggle-knob {
+  transform: translateX(24px);
+  color: var(--accent);
+}
+
+/* 테마 그리드 */
+.theme-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+}
+
+.theme-option-card {
+  padding: 12px;
+  background: var(--bg);
+  border: 2px solid var(--border);
+  border-radius: 16px;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+
+.theme-option-card:hover {
+  transform: translateY(-2px);
+  border-color: var(--accent-light);
+}
+
+.theme-option-card.active {
+  border-color: var(--accent);
+  background: var(--surface);
+  box-shadow: 0 8px 20px rgba(184, 193, 236, 0.15);
+}
+
+.color-preview {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: 3px solid white;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+}
+
+.color-name {
+  font-size: 0.75rem;
+  font-weight: 800;
+  color: var(--text);
+}
+
+
+/* ============================================================
+   5. 푸터 스타일
+   ============================================================ */
+
+.settings-modal-footer {
+  padding: 20px 32px 32px;
+  background: var(--surface);
+}
+
+.settings-done-btn {
+  width: 100%;
+  padding: 16px;
+  border-radius: 20px;
+  border: none;
+  background: var(--accent);
+  color: white;
+  font-weight: 900;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: all 0.3s;
+  box-shadow: 0 8px 20px rgba(184, 193, 236, 0.3);
+}
+
+.settings-done-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 25px rgba(184, 193, 236, 0.4);
+}
+
+@keyframes settingsFadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes settingsSlideUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@media (max-width: 480px) {
+  .theme-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}

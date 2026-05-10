@@ -1,36 +1,183 @@
+/* ============================================================
+   1. 폰트 선언 (FONT DECLARATIONS)
+   ============================================================ */
+
+/* 리디바탕 - 본문용 서체 (문학적인 감성) */
+@font-face {
+    font-family: 'Ridibatang';
+    src: url('https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_twelve@1.0/RIDIBatang.woff') format('woff');
+    font-weight: normal;
+    font-display: swap;
+}
+
+/* 교보손글씨체 2019 - 강조/제목용 서체 (아날로그 감성) */
+@font-face {
+    font-family: 'KyoboHandwriting2019';
+    src: url('https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_20-04@1.0/KyoboHand.woff') format('woff');
+    font-weight: normal;
+    font-display: swap;
+}
+
+/* 프리텐다드 - 기본 서체 */
+@font-face {
+    font-family: 'Pretendard';
+    src: url('https://cdn.jsdelivr.net/gh/projectnoonnu/pretendard@1.0/Pretendard-Thin.woff2') format('woff2');
+    font-weight: normal;
+    font-display: swap;
+}
+
+/* 배달의 민족 주아체 - 포인트 서체 */
+@font-face {
+    font-family: 'Juache';
+    src: url('https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_one@1.0/BMJUA.woff') format('woff');
+    font-weight: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'Cafe24Surround';
+    src: url('https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_2105_2@1.0/Cafe24Ssurround.woff') format('woff');
+    font-weight: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'NanumSquareNeo';
+    src: url(https://hangeul.pstatic.net/hangeul_static/webfont/NanumSquareNeo/NanumSquareNeoTTF-aLt.woff2);
+    font-weight: 300;
+    font-display: swap;
+}
+
+/* ============================================================
+   2. 글로벌 변수 및 테마 설정 (GLOBAL VARIABLES & THEMES)
+   ============================================================ */
+
 :root {
-  /* Soft Pastel Palette */
+  /* 부드러운 파스텔 팔레트 (라이트 모드 기본) */
   --bg: #fbfbfc;
   --surface: #ffffff;
   --text: #5e6c84;
   --text-h: #454d66;
   --border: #f0f2f5;
-  
-  --accent: #b8c1ec;        /* Lavender Blue */
-  --accent-light: #eef1ff;  /* Lavender Sky */
-  --secondary: #fbc2eb;     /* Rose Pink */
-  --success: #a8e6cf;       /* Mint Green */
-  --warning: #ffd3b6;       /* Peach Orange */
+
+  /* 뱃지 안 글씨 색 지정*/
+  --font-color: black;
+
+  --accent: #d5e2f9;        /* 스카이 블루 */
+  --accent-light: #d5e2f925; /* 스카이블루 light */
+  --accent-heavy: #a4b1c4; /* 스카이블루 heavy */
+  --secondary: #fbc2eb;     /* 로즈 핑크 */
+  --success: #a8e6cf;       /* 민트 그린 */
+  --warning: #ffd3b6;       /* 피치 오렌지 */
   
   --shadow-sm: 0 4px 12px rgba(184, 193, 236, 0.08);
   --shadow-md: 0 12px 30px rgba(184, 193, 236, 0.12);
   
-  --sans: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
+  /* 타이포그래피 변수 */
+  --font-body: 'KyoboHandwriting2019', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
+  --font-title: 'Cafe24Surround', sans-serif;
 }
 
-body {
+/* 다크 모드 - 감성 새벽 (블랙 & 인디고) */
+[data-theme='dark'] {
+  --bg: #0a0a0c;            /* 심야의 블랙 */
+  --surface: #16161e;       /* 깊은 도쿄 나이트 서피스 */
+  --text: #a9adc1;          /* 부드러운 실버 */
+  --text-h: #c0caf5;        /* 밝은 인디고 텍스트 */
+  --border: #23232e;        /* 어두운 보더 */
+
+  /* 뱃지 안 글씨 색 지정*/
+  --font-color: white;
+  
+  --accent: #d5e2f9;        /* 스카이 블루 */
+  --accent-light: #d5e2f925; /* 스카이블루 light */
+  --accent-heavy: #a4b1c4; /* 스카이블루 heavy */
+  --secondary: #bb9af7;     /* 네온 퍼플 */
+  --success: #9ece6a;       /* 선명한 그린 */
+  --warning: #e0af68;       /* 앰버 골드 */
+
+  --shadow-sm: 0 4px 12px rgba(0, 0, 0, 0.5);
+  --shadow-md: 0 12px 40px rgba(0, 0, 0, 0.6);
+}
+
+
+/* ============================================================
+   3. 다크 모드 컴포넌트 오버라이드 (DARK MODE OVERRIDES)
+   ============================================================ */
+
+/* 다크 모드 네온 헤더 글로우 효과 강화 */
+[data-theme='dark'] .header-style-neon {
+  box-shadow: 0 0 25px var(--bg-color), 0 0 10px var(--bg-color), 0 0 5px white;
+  border-color: rgba(255, 255, 255, 0.8);
+}
+
+/* 기본 서피스 및 컨테이너 */
+[data-theme='dark'] .calendar-wrapper,
+[data-theme='dark'] .calendar-header,
+[data-theme='dark'] .independent-modal,
+[data-theme='dark'] .modal-footer {
+  background: var(--surface);
+  border-color: var(--border);
+}
+
+/* 달력 그리드 및 특정 요소 */
+[data-theme='dark'] .calendar-grid {
+  background: #1f2335;
+}
+
+[data-theme='dark'] .calendar-day:hover {
+  background: #2a2f41;
+}
+
+[data-theme='dark'] .summary-item {
+  background: #2f354a;
+  color: #c0caf5;
+  box-shadow: none;
+}
+
+/* UI 컨트롤 요소 */
+[data-theme='dark'] .side-menu-toggle-btn {
+  background: var(--surface);
+  border-color: var(--border);
+}
+
+
+/* ============================================================
+   4. 기본 HTML 및 타이포그래피 스타일 (BASE STYLES)
+   ============================================================ */
+
+html, body {
   margin: 0;
   padding: 0;
+  width: 100%;
+  height: 100%;
   background-color: var(--bg);
   color: var(--text);
-  font-family: var(--sans);
+  font-family: var(--font-body);
   -webkit-font-smoothing: antialiased;
+  
+  /* 테마 전환 시 부드러운 애니메이션 */
+  transition: background-color 0.3s ease, color 0.3s ease;
 }
 
-h1, h2, h3, h4 {
+html::-webkit-scrollbar {
+  display: none;
+}
+
+/* 헤딩 타이포그래피 */
+h1, h2, h3, h4, h5, h6 {
   color: var(--text-h);
+  font-family: var(--font-title);
+  margin-top: 0;
 }
 
+/* 전역 버튼 기본 스타일 */
 button {
-  font-family: var(--sans);
+  font-family: var(--font-body);
+  cursor: pointer;
+}
+
+/* 스크롤 잠금 */
+body.no-scroll {
+  overflow: hidden;
 }

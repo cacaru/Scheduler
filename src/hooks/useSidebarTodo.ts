@@ -31,14 +31,37 @@ export const useSidebarTodo = () => {
   const groupedTodos = useMemo(() => {
     const groups: { [month: string]: { [date: string]: EntryItem[] } } = {};
 
+    // 1. 모든 고유한 Todo 추출 (ID 중복 제거)
+    const allUniqueTodos = new Map<string, { item: EntryItem, date: string }>();
     Object.entries(entries).forEach(([date, items]) => {
-      const todos = items.filter((item) => item.type === 'todo');
-      if (todos.length === 0) return;
-
-      const month = date.substring(0, 7);
-      if (!groups[month]) groups[month] = {};
-      groups[month][date] = todos;
+      items.filter(i => i.type === 'todo').forEach(todo => {
+        if (!allUniqueTodos.has(todo.id)) {
+          allUniqueTodos.set(todo.id, { item: todo, date });
+        }
+      });
     });
+
+    // 2. 그룹화 로직
+    allUniqueTodos.forEach(({ item, date }, _id) => {
+      const isRange = item.start_date && item.end_date && item.start_date !== item.end_date;
+      
+      // 기준 월 결정 (기간형은 시작일 기준, 단일형은 등록일 기준)
+      const targetDate = isRange ? item.start_date! : date;
+      const month = targetDate.substring(0, 7);
+      
+      if (!groups[month]) groups[month] = {};
+
+      if (isRange) {
+        // 기간형 항목은 해당 월의 'range' 섹션에 모음
+        if (!groups[month]['range']) groups[month]['range'] = [];
+        groups[month]['range'].push(item);
+      } else {
+        // 단일 날짜 항목은 기존처럼 일별 분류
+        if (!groups[month][date]) groups[month][date] = [];
+        groups[month][date].push(item);
+      }
+    });
+
     return groups;
   }, [entries]);
 
@@ -56,6 +79,8 @@ export const useSidebarTodo = () => {
     [groupedTodos]
   );
 // ... rest of the hook stays the same
+
+  const toggleTodo = useDiaryStore((state) => state.toggleTodo);
 
   const startEditing = useCallback((date: string, item: EntryItem) => {
     setEditingId(item.id);
@@ -99,6 +124,7 @@ export const useSidebarTodo = () => {
       startEditing,
       handleSaveEdit,
       cancelEditing,
+      toggleTodo,
     },
   };
 };

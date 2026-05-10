@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo, useRef, useCallback } from 'react';
-import { useDiaryStore } from '../../../store/diaryStore';
-import { useUIStore } from '../../../store/uiStore';
+import { useDiaryStore } from '../../../../store/diaryStore';
+import { useUIStore } from '../../../../store/uiStore';
 import { useDiaryForm } from './useDiaryForm';
 import { type DragStartEvent, type DragEndEvent } from '@dnd-kit/core';
 
@@ -32,7 +32,40 @@ export const useDiaryModalLogic = ({ date, isOpen, onClose }: UseDiaryModalLogic
   const [isClosing, setIsClosing] = useState(false);
   const hasNavigated = useRef(false);
 
-  const dayItems = useMemo(() => entries[date] || [], [entries, date]);
+  const dayItems = useMemo(() => {
+    const dailyItems = entries[date] || [];
+    
+    // 반복 기념일 찾기 (다른 연도의 같은 월/일)
+    const currentMonthDay = date.slice(5); // "MM-dd"
+    const recurringAnnis: any[] = [];
+    
+    Object.keys(entries).forEach(dateStr => {
+      if (dateStr === date) return;
+      if (dateStr.endsWith(currentMonthDay)) {
+        const annis = entries[dateStr].filter(item => item.type === 'anniversary' && item.is_recurring);
+        recurringAnnis.push(...annis);
+      }
+    });
+
+    const combined = [...dailyItems, ...recurringAnnis];
+
+    // 기념일 최상단, 그 외에는 시작일(오래된 순) 정렬
+    return combined.sort((a, b) => {
+      // 1. 기념일 우선
+      if (a.type === 'anniversary' && b.type !== 'anniversary') return -1;
+      if (a.type !== 'anniversary' && b.type === 'anniversary') return 1;
+      
+      // 2. 시작일 기준 정렬 (오래된 순)
+      const aStart = a.start_date || '9999-99-99';
+      const bStart = b.start_date || '9999-99-99';
+      
+      if (aStart !== bStart) {
+        return aStart.localeCompare(bStart);
+      }
+      
+      return 0;
+    });
+  }, [entries, date]);
 
   const selectedDetailItem = useMemo(() => {
     if (!selectedDetailId) return null;
@@ -45,7 +78,7 @@ export const useDiaryModalLogic = ({ date, isOpen, onClose }: UseDiaryModalLogic
   }, [activeId, dayItems]);
 
   const form = useDiaryForm({ 
-    date, 
+    initialDate: date, 
     onClose: () => setIsFormOpen(false) 
   });
 
@@ -100,6 +133,17 @@ export const useDiaryModalLogic = ({ date, isOpen, onClose }: UseDiaryModalLogic
     }
     setActiveId(null);
   }, [date, reorderItems]);
+
+  // ESC 키로 모달 닫기
+  useEffect(() => {
+    const handleEsc = (e: KeyboardEvent) => {
+      if (e.key === 'Escape' && isOpen) {
+        handleDelayedClose();
+      }
+    };
+    window.addEventListener('keydown', handleEsc);
+    return () => window.removeEventListener('keydown', handleEsc);
+  }, [isOpen, handleDelayedClose]);
 
   return {
     state: {

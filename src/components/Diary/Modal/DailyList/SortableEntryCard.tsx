@@ -1,8 +1,16 @@
 import React from 'react';
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
-import { Trash2, Book, Check, GripVertical } from 'lucide-react';
-import { type EntryItem } from '../../../store/diaryStore';
+import { Trash2, Book, Check, GripVertical, Gift, Heart, Star, Cake, PartyPopper } from 'lucide-react';
+import { type EntryItem } from '../../../../store/diaryStore';
+
+const ANNIVERSARY_ICONS: Record<string, React.ElementType> = {
+  Gift,
+  Heart,
+  Star,
+  Cake,
+  Party: PartyPopper,
+};
 
 /**
  * SortableEntryCard.tsx
@@ -69,6 +77,11 @@ const SortableEntryCard: React.FC<SortableEntryCardProps> = ({
                 <div className="empty-circle" style={{ borderColor: itemColor }} />
               }
             </button>
+          ) : item.type === 'anniversary' ? (
+            (() => {
+              const Icon = ANNIVERSARY_ICONS[item.icon || 'Gift'] || Gift;
+              return <Icon size={20} style={{ color: itemColor }} />;
+            })()
           ) : (
             <Book className="diary-icon" size={20} style={{ color: itemColor }} />
           )}

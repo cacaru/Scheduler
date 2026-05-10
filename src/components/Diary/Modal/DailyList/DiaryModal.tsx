@@ -1,5 +1,5 @@
 import React from 'react';
-import { Plus, X as CloseIcon } from 'lucide-react';
+import { Plus, X as CloseIcon, Gift } from 'lucide-react';
 import { 
   DndContext, 
   closestCenter, 
@@ -10,13 +10,16 @@ import {
   defaultDropAnimationSideEffects
 } from '@dnd-kit/core';
 import { SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable';
-import { formatDateWithDay } from '../../../utils/dateUtils';
+import { formatDateWithDay } from '../../../../utils/dateUtils';
 
 // 분리된 컴포넌트 및 로직
 import SortableEntryCard from './SortableEntryCard';
 import EntryDetailView from './EntryDetailView';
 import EntryEditForm from './EntryEditForm';
+import AnniversaryModal from '../Anniversary/AnniversaryModal';
 import { useDiaryModalLogic } from './useDiaryModalLogic';
+
+import { useUIStore } from '../../../../store/uiStore';
 
 import './DiaryModal.css';
 
@@ -33,6 +36,9 @@ interface DiaryModalProps {
 }
 
 const DiaryModal: React.FC<DiaryModalProps> = ({ date, isOpen, onClose }) => {
+  const [isAnniModalOpen, setIsAnniModalOpen] = React.useState(false);
+  const setModalOpen = useUIStore(state => state.setModalOpen);
+
   const sensors = useSensors(
     useSensor(PointerSensor, {
       activationConstraint: {
@@ -42,6 +48,28 @@ const DiaryModal: React.FC<DiaryModalProps> = ({ date, isOpen, onClose }) => {
   );
 
   const { state, actions, form } = useDiaryModalLogic({ date, isOpen, onClose });
+
+  // 하위 모달 상태 변경 시 스크롤 잠금 제어 (메인 DiaryModal은 이미 DiaryCalendar에서 처리됨)
+  React.useEffect(() => {
+    if (isAnniModalOpen) {
+      setModalOpen(true);
+      return () => setModalOpen(false);
+    }
+  }, [isAnniModalOpen, setModalOpen]);
+
+  React.useEffect(() => {
+    if (state.isFormOpen) {
+      setModalOpen(true);
+      return () => setModalOpen(false);
+    }
+  }, [state.isFormOpen, setModalOpen]);
+
+  React.useEffect(() => {
+    if (state.selectedDetailId) {
+      setModalOpen(true);
+      return () => setModalOpen(false);
+    }
+  }, [state.selectedDetailId, setModalOpen]);
 
   if (!isOpen) return null;
 
@@ -73,6 +101,7 @@ const DiaryModal: React.FC<DiaryModalProps> = ({ date, isOpen, onClose }) => {
             <SortableContext items={state.dayItems.map(i => i.id)} strategy={verticalListSortingStrategy}>
               <div className="entry-list">
                 {state.dayItems.map(item => (
+                  <>
                   <SortableEntryCard 
                     key={item.id}
                     item={item}
@@ -85,6 +114,8 @@ const DiaryModal: React.FC<DiaryModalProps> = ({ date, isOpen, onClose }) => {
                       if(state.selectedDetailId === id) actions.setSelectedDetailId(null);
                     }}
                   />
+                  </>
+                  
                 ))}
                 {state.dayItems.length === 0 && <div style={{ textAlign: 'center', padding: '60px 0', color: '#a0aec0', fontWeight: 700 }}>기록이 없습니다.</div>}
               </div>
@@ -110,6 +141,9 @@ const DiaryModal: React.FC<DiaryModalProps> = ({ date, isOpen, onClose }) => {
           </DndContext>
         </div>
         <div className="modal-footer">
+          <button className="anni-reg-btn" onClick={() => setIsAnniModalOpen(true)}>
+            <Gift size={20} /> 기념일 등록하기
+          </button>
           <button className="add-btn" onClick={() => { form.actions.resetForm(); actions.setIsFormOpen(true); }}>
             <Plus size={20} /> 새 항목 추가
           </button>
@@ -126,6 +160,9 @@ const DiaryModal: React.FC<DiaryModalProps> = ({ date, isOpen, onClose }) => {
         selectedColor={form.formState.selectedColor}
         selectedLocation={form.formState.selectedLocation}
         showMap={form.formState.showMap}
+        currentDate={form.formState.date}
+        startDate={form.formState.startDate}
+        endDate={form.formState.endDate}
         onClose={() => actions.setIsFormOpen(false)}
         setType={form.setters.setType}
         setTitle={form.setters.setTitle}
@@ -133,7 +170,17 @@ const DiaryModal: React.FC<DiaryModalProps> = ({ date, isOpen, onClose }) => {
         setSelectedColor={form.setters.setSelectedColor}
         setSelectedLocation={form.setters.setSelectedLocation}
         setShowMap={form.setters.setShowMap}
+        onDateChange={form.setters.setDate}
+        setStartDate={form.setters.setStartDate}
+        setEndDate={form.setters.setEndDate}
         onSubmit={form.actions.handleAddOrUpdate}
+      />
+
+      {/* 4. 기념일 등록 모달 */}
+      <AnniversaryModal 
+        isOpen={isAnniModalOpen} 
+        onClose={() => setIsAnniModalOpen(false)} 
+        initialDate={date}
       />
     </div>
   );

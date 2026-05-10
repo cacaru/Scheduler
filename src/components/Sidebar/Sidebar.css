@@ -1,4 +1,7 @@
-/* Sidebar - Modern Professional Redesign */
+/* ============================================================
+   1. 사이드바 글로벌 변수 및 Z-INDEX (GLOBAL VARS)
+   ============================================================ */
+
 :root {
   --sidebar-width: 280px;
   --sidebar-bg: #ffffff;
@@ -8,13 +11,17 @@
   --text-muted: #64748b;
   --shadow-soft: 0 10px 25px -5px rgba(0, 0, 0, 0.05);
   
-  /* Z-index layers */
+  /* 레이어 관리 */
   --z-overlay: 1000;
   --z-sidebar: 1001;
   --z-modal: 2000;
 }
 
-/* Custom Scrollbar */
+
+/* ============================================================
+   2. 커스텀 스크롤바 (CUSTOM SCROLLBARS)
+   ============================================================ */
+
 .side-menu-nav::-webkit-scrollbar,
 .side-extension-content::-webkit-scrollbar,
 .side-todo-modal::-webkit-scrollbar {
@@ -33,6 +40,11 @@
 .side-todo-modal::-webkit-scrollbar-track {
   background: transparent;
 }
+
+
+/* ============================================================
+   3. 오버레이 및 컨테이너 (OVERLAY & CONTAINER)
+   ============================================================ */
 
 .side-sidebar-overlay {
   position: fixed;
@@ -65,7 +77,11 @@
   transform: translateX(0);
 }
 
-/* Stage 1: Main Side Menu */
+
+/* ============================================================
+   4. 1단계: 메인 사이드 메뉴 (MAIN SIDE MENU)
+   ============================================================ */
+
 .side-menu {
   width: var(--sidebar-width);
   background-color: var(--sidebar-bg);
@@ -76,11 +92,16 @@
   position: relative;
 }
 
+/* 메뉴 헤더 */
 .side-menu-header {
   padding: 2rem 1.5rem;
   display: flex;
   align-items: center;
   justify-content: space-between;
+}
+
+.side-menu-header span {
+  font-family: var(--font-title);
 }
 
 .side-logo {
@@ -112,6 +133,7 @@
   transform: scale(1.2);
 }
 
+/* 메뉴 바디 및 내비게이션 */
 .side-menu-body {
   flex: 1;
   display: flex;
@@ -129,13 +151,20 @@
   scrollbar-width: thin;
 }
 
+.side-menu-nav span {
+  font-family: var(--font-title);
+}
+
 .side-nav-divider {
   height: 1px;
   background: var(--sidebar-border);
   margin: 0.5rem 1rem;
+  flex-shrink: 0;
 }
 
+/* 내비게이션 아이템 스타일 */
 .side-menu-item {
+  flex-shrink: 0;
   display: flex;
   align-items: center;
   gap: 15px;
@@ -168,6 +197,16 @@
   color: var(--accent);
 }
 
+.side-menu-item.logout-btn {
+  margin-top: auto;
+  color: #e53e3e;
+}
+
+.side-menu-item.logout-btn:hover {
+  background: #fff5f5;
+  color: #c53030;
+}
+
 .side-menu-item svg {
   flex-shrink: 0;
 }
@@ -183,7 +222,11 @@
   opacity: 1;
 }
 
-/* Footer & Settings */
+
+/* ============================================================
+   5. 푸터 및 설정 아코디언 (FOOTER & SETTINGS)
+   ============================================================ */
+
 .side-menu-footer {
   padding: 1rem;
   border-top: 1px solid var(--sidebar-border);
@@ -203,52 +246,55 @@
 }
 
 .side-settings-accordion.expanded .side-settings-content {
-  max-height: 120px;
+  max-height: 200px;
   opacity: 1;
   padding: 1rem 0.5rem 0.5rem;
 }
 
-.side-theme-picker {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-}
-
-.side-theme-label {
+.side-setting-row {
   display: flex;
   align-items: center;
-  gap: 6px;
-  font-size: 0.7rem;
-  font-weight: 800;
-  color: var(--text-muted);
-  text-transform: uppercase;
+  justify-content: space-between;
+  margin-bottom: 1.5rem;
 }
 
-.side-theme-options {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-}
-
-.side-theme-dot {
-  width: 22px;
-  height: 22px;
-  border-radius: 6px;
-  border: 2px solid transparent;
+/* 테마 전환 스위치 */
+.theme-toggle-switch {
+  width: 48px;
+  height: 24px;
+  background: var(--sidebar-border);
+  border-radius: 20px;
+  padding: 3px;
   cursor: pointer;
-  transition: all 0.2s;
+  border: none;
+  position: relative;
+  transition: background 0.3s;
 }
 
-.side-theme-dot:hover {
-  transform: translateY(-2px);
+.switch-knob {
+  width: 18px;
+  height: 18px;
+  background: white;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--accent);
+  transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
 }
 
-.side-theme-dot.active {
-  border-color: var(--text-main);
-  box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+.switch-knob.active {
+  transform: translateX(24px);
+  background: var(--surface);
+  color: #fbbf24;
 }
 
-/* Stage 2: To-do Extension */
+
+/* ============================================================
+   6. 2단계: 할 일 / 일기 확장 패널 (EXTENSION PANEL)
+   ============================================================ */
+
 .side-todo-extension {
   width: 0;
   background-color: #fcfdfe;
@@ -265,6 +311,7 @@
   transition: none;
 }
 
+/* 패널 리사이저 */
 .side-extension-resizer {
   position: absolute;
   right: 0;
@@ -280,6 +327,7 @@
   opacity: 0.5;
 }
 
+/* 확장 패널 헤더 */
 .side-extension-header {
   padding: 1.5rem;
   display: flex;
@@ -295,13 +343,19 @@
   color: var(--text-main);
 }
 
+/* 확장 패널 콘텐츠 */
 .side-extension-content {
   flex: 1;
   overflow-y: auto;
   padding: 1.5rem;
 }
 
-/* List Items Redesign */
+
+/* ============================================================
+   7. 리스트 그룹화 및 아이템 (LIST ITEMS)
+   ============================================================ */
+
+/* 월별 그룹 */
 .side-month-group {
   margin-bottom: 1.5rem;
 }
@@ -320,10 +374,6 @@
 
 .side-month-header:hover {
   background: var(--accent-light);
-}
-
-.side-month-header:active {
-  transform: scale(0.98);
 }
 
 .side-month-title {
@@ -354,12 +404,35 @@
   opacity: 1;
 }
 
-.side-date-group {
-  margin-bottom: 1.5rem;
-  border-left: 2px solid var(--sidebar-border);
-  padding-left: 1rem;
-  margin-left: 0.5rem;
+/* Range Group Styling */
+.range-group {
+  border-left: 2px solid var(--accent) !important;
+  background: var(--accent-light);
+  border-radius: 12px;
+  padding: 10px !important;
 }
+
+.range-badge {
+  color: var(--accent) !important;
+  margin-bottom: 15px !important;
+}
+
+.side-range-item-wrapper {
+  margin-bottom: 12px;
+}
+
+.side-range-duration {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.7rem;
+  font-weight: 800;
+  color: var(--accent);
+  margin-bottom: 4px;
+  margin-left: 5px;
+  opacity: 0.8;
+}
+
 
 .side-date-badge {
   display: flex;
@@ -371,12 +444,14 @@
   margin-bottom: 12px;
 }
 
+/* 아이템 리스트 */
 .side-todo-list {
   list-style: none;
   padding: 0;
   margin: 0;
 }
 
+/* 개별 아이템 카드 */
 .side-todo-item {
   background: white;
   border: 1px solid var(--sidebar-border);
@@ -392,10 +467,6 @@
   border-color: var(--accent);
   box-shadow: 0 4px 12px rgba(0,0,0,0.03);
   transform: translateY(-1px);
-}
-
-.side-todo-item:active {
-  transform: translateY(0) scale(0.98);
 }
 
 .side-todo-item.selected {
@@ -424,11 +495,6 @@
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
-  transition: transform 0.2s;
-}
-
-.side-todo-toggle-btn:hover {
-  transform: scale(1.1);
 }
 
 .side-todo-title {
@@ -461,24 +527,11 @@
   opacity: 1;
 }
 
-.side-todo-edit-btn:hover {
-  background: var(--accent-light);
-  color: var(--accent);
-  transform: scale(1.05);
-}
 
-/* Empty State */
-.side-empty-state {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  padding: 3rem 0;
-  color: var(--text-muted);
-  opacity: 0.6;
-}
+/* ============================================================
+   8. 3단계: 할 일 상세 모달 (TODO DETAIL MODAL)
+   ============================================================ */
 
-/* Stage 3: Central Todo Detail Modal */
 .side-modal-overlay {
   position: fixed;
   inset: 0;
@@ -498,13 +551,14 @@
   max-height: 90vh;
   border-radius: 32px;
   padding: 2rem;
-  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.15), 0 0 20px rgba(0, 0, 0, 0.05);
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.15);
   overflow-y: auto;
   position: relative;
   border: 1px solid var(--sidebar-border);
   animation: modalScaleUp 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
+/* 상세 정보 헤더 */
 .side-detail-header {
   display: flex;
   align-items: center;
@@ -514,10 +568,18 @@
   border-bottom: 1px solid var(--sidebar-border);
 }
 
-.side-detail-body {
+.side-detail-header-left {
   display: flex;
   flex-direction: column;
-  gap: 2rem;
+  gap: 8px;
+  min-width: 0;
+}
+
+.side-detail-header-left h4 {
+  margin: 0;
+  font-size: 1.4rem;
+  font-weight: 900;
+  color: var(--text-main);
 }
 
 .side-detail-content-text {
@@ -531,18 +593,92 @@
   white-space: pre-wrap;
 }
 
-.side-sheet-footer {
-  margin-top: 2rem;
-  padding-top: 1.5rem;
-  border-top: 1px solid var(--sidebar-border);
+.side-detail-footer {
   display: flex;
-  justify-content: flex-end;
+  justify-content: space-between;
+  padding-top: 5%;
 }
 
-@keyframes modalScaleUp {
-  from { opacity: 0; transform: scale(0.95); }
-  to { opacity: 1; transform: scale(1); }
+/* ============================================================
+   9. 로그아웃 확인 모달 (LOGOUT CONFIRMATION)
+   ============================================================ */
+
+.logout-confirm-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.4);
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 3000;
+  animation: fadeIn 0.2s ease;
 }
+
+.logout-confirm-modal {
+  background: white;
+  padding: 2rem;
+  border-radius: 24px;
+  width: 90%;
+  max-width: 360px;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+  text-align: center;
+}
+
+.logout-confirm-buttons {
+  display: flex;
+  gap: 12px;
+}
+
+.logout-confirm-buttons button {
+  flex: 1;
+  padding: 12px;
+  border-radius: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s;
+  border: none;
+}
+
+.logout-btn-cancel { background: #f1f5f9; color: #64748b; }
+.logout-btn-confirm { background: #ef4444; color: white; }
+
+
+/* ============================================================
+   10. 다크 모드 오버라이드 - 사이드바 (DARK MODE OVERRIDES)
+   ============================================================ */
+
+[data-theme='dark'] {
+  --sidebar-bg: #1e1e2e;
+  --sidebar-border: #2e2e3e;
+  --sidebar-item-hover: #2a2a3a;
+  --text-main: #e0e0e0;
+  --text-muted: #94a3b8;
+}
+
+[data-theme='dark'] .side-menu-footer { background: #1e1e2e; }
+[data-theme='dark'] .side-todo-extension { background-color: #1a1b26; }
+
+[data-theme='dark'] .side-todo-item,
+[data-theme='dark'] .side-todo-modal,
+[data-theme='dark'] .logout-confirm-modal {
+  background: #24283b;
+  border-color: #292e42;
+}
+
+[data-theme='dark'] .side-detail-content-text {
+  background: #1a1b26;
+  border-color: #292e42;
+}
+
+[data-theme='dark'] .theme-toggle-switch {
+  background: var(--accent);
+}
+
+
+/* ============================================================
+   11. 반응형 미디어 쿼리 및 애니메이션 (RESPONSIVE)
+   ============================================================ */
 
 @media (max-width: 1024px) {
   .side-menu { width: 240px; }
@@ -554,4 +690,14 @@
     padding: 1.5rem;
     width: 95%;
   }
+}
+
+@keyframes modalScaleUp {
+  from { opacity: 0; transform: scale(0.95); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
 }

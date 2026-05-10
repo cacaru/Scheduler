@@ -1,0 +1,390 @@
+/* ============================================================
+   1. 기념일 모달 오버레이 및 컨테이너 (OVERLAY & CONTAINER)
+   ============================================================ */
+
+.anniversary-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.3);
+  backdrop-filter: blur(8px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 4000;
+  animation: fadeIn 0.3s ease-out;
+}
+
+.anniversary-modal-container {
+  background: var(--surface);
+  width: clamp(340px, 90%, 850px);
+  max-height: 90vh;
+  border-radius: clamp(24px, 4vw, 32px);
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.15);
+  overflow: hidden;
+  animation: modalSlideUp 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+  display: flex;
+  flex-direction: column;
+  border: 1px solid var(--border);
+}
+
+
+/* ============================================================
+   2. 헤더 스타일 (HEADER STYLES)
+   ============================================================ */
+
+.anniversary-modal-header {
+  padding: clamp(16px, 3vw, 24px) clamp(20px, 4vw, 32px);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+}
+
+.header-title {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.title-icon {
+  color: #ffadad;
+}
+
+.anniversary-modal-header h3 {
+  margin: 0;
+  font-size: clamp(1.1rem, 1.5vw, 1.3rem);
+  font-weight: 800;
+  color: var(--text-h);
+  font-family: var(--font-body);
+}
+
+.close-btn {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  border: none;
+  background: var(--bg);
+  color: var(--text-muted);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.close-btn:hover {
+  background: var(--border);
+  color: var(--text-h);
+  transform: rotate(90deg);
+}
+
+
+/* ============================================================
+   3. 바디 및 폼 그리드 (BODY & FORM GRID)
+   ============================================================ */
+
+.anniversary-modal-body {
+  padding: clamp(20px, 4vw, 32px);
+  flex: 1;
+  overflow-y: auto;
+}
+
+.anni-form-grid {
+  display: grid;
+  grid-template-columns: clamp(320px, 40%, 340px) 1fr;
+  gap: clamp(20px, 4vw, 40px);
+}
+
+.form-section {
+  margin-bottom: clamp(20px, 3vw, 28px);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.form-section:last-child {
+  margin-bottom: 0;
+}
+
+.form-section label {
+  font-size: 0.85rem;
+  font-weight: 800;
+  color: var(--text-muted);
+  padding-left: 4px;
+}
+
+
+/* ============================================================
+   4. 입력창 및 컨트롤 (INPUTS & CONTROLS)
+   ============================================================ */
+
+.anni-input {
+  width: 100%;
+  padding: clamp(12px, 1.5vw, 15px) clamp(16px, 2vw, 20px);
+  border: 2px solid var(--border);
+  border-radius: 18px;
+  font-size: clamp(0.9rem, 1.2vw, 1rem);
+  color: var(--text);
+  transition: all 0.2s;
+  background: var(--bg);
+  font-family: var(--font-body);
+  box-sizing: border-box;
+}
+
+.anni-input:focus {
+  outline: none;
+  border-color: #ffadad;
+  background: var(--surface);
+  box-shadow: 0 0 0 4px rgba(255, 173, 173, 0.1);
+}
+
+.anni-textarea {
+  resize: none;
+  min-height: 100px;
+  line-height: 1.6;
+}
+
+.anni-textarea::-webkit-scrollbar {
+  display: none;
+}
+
+/* 스위치 스타일 */
+.switch-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: var(--bg);
+  padding: 12px 16px;
+  border-radius: 16px;
+  border: 1px solid var(--border);
+}
+
+.switch {
+  position: relative;
+  display: inline-block;
+  width: 44px;
+  height: 24px;
+}
+
+.switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.slider {
+  position: absolute;
+  cursor: pointer;
+  inset: 0;
+  background-color: #e2e8f0;
+  transition: .4s;
+  border-radius: 24px;
+}
+
+.slider:before {
+  position: absolute;
+  content: "";
+  height: 18px;
+  width: 18px;
+  left: 3px;
+  bottom: 3px;
+  background-color: white;
+  transition: .4s;
+  border-radius: 50%;
+}
+
+input:checked + .slider {
+  background-color: #ffadad;
+}
+
+input:checked + .slider:before {
+  transform: translateX(20px);
+}
+
+/* 색상 및 아이콘 옵션 */
+.color-options {
+  display: grid;
+  grid-template-columns: repeat(8, 1fr);
+  flex-wrap: wrap;
+  gap: 10px;
+  padding: 12px;
+  background: var(--bg);
+  border-radius: 18px;
+  border: 1px solid var(--border);
+}
+
+.color-dot {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  border: 3px solid white;
+  cursor: pointer;
+  transition: all 0.2s;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+
+.color-dot.active {
+  transform: scale(1.2);
+  box-shadow: 0 0 0 2px var(--border);
+}
+
+.icon-options {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 8px;
+  padding: 12px;
+  background: var(--bg);
+  border-radius: 18px;
+  border: 1px solid var(--border);
+}
+
+.icon-item {
+  aspect-ratio: 1;
+  border-radius: 12px;
+  border: 2px solid transparent;
+  background: var(--surface);
+  color: var(--text-muted);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.icon-item:hover {
+  background: var(--border);
+  color: var(--text-h);
+}
+
+.icon-item.active {
+  background: #fff0f0;
+  color: #ffadad;
+  border-color: #ffadad;
+}
+
+/* 지도 토글 버튼 */
+.map-toggle-btn {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 14px;
+  border-radius: 18px;
+  border: 2px dashed var(--border);
+  background: var(--surface);
+  color: var(--text-muted);
+  font-weight: 800;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: 0.3s;
+  font-family: var(--font-body);
+}
+
+.map-toggle-btn:hover {
+  border-color: #ffadad;
+  color: #ffadad;
+}
+
+.map-toggle-btn.active {
+  border-style: solid;
+  border-color: #ffadad;
+  background: #ffadad;
+  color: white;
+  box-shadow: 0 8px 20px rgba(255, 173, 173, 0.2);
+}
+
+.anni-map-container {
+  height: 320px;
+  border-radius: 20px;
+  overflow: hidden;
+  border: 1px solid var(--border);
+  margin-top: 10px;
+}
+
+.selected-location-info {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 12px;
+  padding: 10px 16px;
+  background: var(--bg);
+  border-radius: 12px;
+  color: var(--text);
+  font-size: 0.85rem;
+  font-weight: 600;
+  border: 1px solid var(--border);
+}
+
+
+/* ============================================================
+   5. 푸터 및 제출 버튼 (FOOTER & SUBMIT)
+   ============================================================ */
+
+.anniversary-modal-footer {
+  padding: 1.5rem 2rem;
+  border-top: 1px solid var(--border);
+  background: var(--surface);
+}
+
+.submit-btn {
+  width: 100%;
+  padding: clamp(14px, 2.5vw, 18px);
+  border-radius: 20px;
+  border: none;
+  background: linear-gradient(135deg, #ffadad, #ffd6a5);
+  color: white;
+  font-weight: 900;
+  font-size: clamp(0.95rem, 1.5vw, 1.15rem);
+  cursor: pointer;
+  transition: all 0.3s;
+  box-shadow: 0 10px 20px rgba(255, 173, 173, 0.3);
+  font-family: var(--font-body);
+}
+
+.submit-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 25px rgba(255, 173, 173, 0.4);
+}
+
+.submit-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}
+
+
+/* ============================================================
+   6. 반응형 쿼리 및 애니메이션 (RESPONSIVE & ANIM)
+   ============================================================ */
+
+@media (max-width: 768px) {
+  .anniversary-modal-container {
+    width: 95%;
+    max-height: 95vh;
+    border-radius: 24px 24px 0 0;
+    position: fixed;
+    bottom: 0;
+  }
+
+  .anni-form-grid {
+    grid-template-columns: clamp(320px, 40%, 340px) 1fr;
+    gap: 24px;
+  }
+
+  .anniversary-modal-body {
+    padding: 20px;
+  }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes modalSlideUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}

@@ -4,7 +4,7 @@ import {
   isSameMonth,
   isSameDay,
 } from 'date-fns';
-import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Gift, Heart, Star, Cake, PartyPopper, Book, Clock, Droplet, Notebook, Trophy } from 'lucide-react';
 import { 
   DndContext, 
   type DragEndEvent, 
@@ -19,7 +19,7 @@ import {
 import { useDiaryStore, type EntryItem } from '../../../store/diaryStore';
 import { formatYearMonth } from '../../../utils/dateUtils';
 import { useCalendar } from '../../../hooks/useCalendar';
-import DiaryModal from '../Modal/DiaryModal';
+import DiaryModal from '../Modal/DailyList/DiaryModal';
 import YearMonthPicker from './YearMonthPicker';
 import { useUIStore } from '../../../store/uiStore';
 import './Diary.css';
@@ -30,22 +30,80 @@ import './Diary.css';
  * 드래그 앤 드롭을 통한 항목 이동, 스와이프를 통한 월 전환, 날짜별 모달 오픈을 처리합니다.
  */
 
+const ANNIVERSARY_ICONS: Record<string, React.ElementType> = {
+  Gift,
+  Heart,
+  Star,
+  Cake,
+  Book,
+  Clock,
+  Droplet,
+  Notebook,
+  Trophy,
+  Party: PartyPopper,
+};
+
 // 드래그 가능한 항목
-const DraggableEntry = React.memo<{ item: EntryItem; date: string }>(({ item, date }) => {
+const DraggableEntry = React.memo<{activate: boolean, item: EntryItem; date: string }>(({activate, item, date }) => {
   const { attributes, listeners, setNodeRef, isDragging } = useDraggable({
     id: item.id,
     data: { date, id: item.id },
   });
 
-  const style = useMemo(() => ({
-    opacity: isDragging ? 0.3 : 1,
-    borderLeft: `3px solid ${item.color || (item.type === 'diary' ? '#4a5568' : '#3182ce')}`,
-    backgroundColor: (item.color || (item.type === 'diary' ? '#4a5568' : '#3182ce')) + '15',
-  }), [isDragging, item.color, item.type]);
+  const isRange = item.type === 'todo' && item.start_date && item.end_date && item.start_date !== item.end_date;
+  const isStart = isRange && item.start_date === date;
+  const isEnd = isRange && item.end_date === date;
+  const isMiddle = isRange && !isStart && !isEnd;
+
+  const { theme } = useUIStore();
+
+  const style = useMemo(() => {
+    const bgColor = item.color;
+    const s: React.CSSProperties = {
+      opacity: isDragging ? 0.3 : 1,
+      borderLeft: isRange && !isStart ? 'none' : `4px solid ${bgColor}`,
+      backgroundColor: bgColor + '90',
+      color: theme === 'dark' ? 'white' : 'black',
+      fontWeight: 'normal',
+      position: 'relative',
+      zIndex: isRange ? 5 : 1,
+    };
+
+    if (isRange) {
+      s.borderRadius = '0px';
+      if (isStart) {
+        s.borderTopLeftRadius = '8px';
+        s.borderBottomLeftRadius = '8px';
+        s.marginRight = '-13px'; // 부모 패딩 12px + 미세 보정
+        s.paddingRight = '13px';
+      } else if (isEnd) {
+        s.borderTopRightRadius = '8px';
+        s.borderBottomRightRadius = '8px';
+        s.marginLeft = '-13px';
+        s.paddingLeft = '13px';
+      } else if (isMiddle) {
+        s.marginLeft = '-13px';
+        s.marginRight = '-13px';
+        s.paddingLeft = '13px';
+        s.paddingRight = '13px';
+      }
+    }
+
+    return s;
+  }, [isDragging, item.color, item.type, isRange, isStart, isEnd, isMiddle]);
+
+  if (item.type === 'anniversary') return null;
 
   return (
-    <div ref={setNodeRef} style={style} {...listeners} {...attributes} className={`summary-item ${item.type} ${item.completed ? 'completed' : ''}`}>
-      {item.type === 'todo' ? '• ' : '✎ '}{item.title}
+    activate ? 
+    <div ref={setNodeRef} style={style} {...listeners} {...attributes} className={`summary-item ${item.type} ${item.completed ? 'completed' : ''} ${isRange ? 'range-item' : ''}`}>
+      {(isRange && !isStart) ? '' : (item.type === 'todo' ? '• ' : '✎ ')}
+      {(isRange && !isStart) ? '\u00A0' : item.title}
+    </div>
+    :
+    <div style={style} className={`summary-item ${item.type} ${item.completed ? 'completed' : ''} ${isRange ? 'range-item' : ''}`}>
+      {(isRange && !isStart) ? '' : (item.type === 'todo' ? '• ' : '✎ ')}
+      {(isRange && !isStart) ? '\u00A0' : item.title}
     </div>
   );
 });
@@ -56,27 +114,96 @@ const DroppableDay = React.memo<{
   isCurrentMonth: boolean;
   isToday: boolean;
   items: EntryItem[];
+  allEntries: Record<string, EntryItem[]>;
   onClick: (day: Date) => void;
-}>(({ day, isCurrentMonth, isToday, items, onClick }) => {
+}>(({ day, isCurrentMonth, isToday, items, allEntries, onClick }) => {
   const formattedDate = useMemo(() => format(day, 'yyyy-MM-dd'), [day]);
   const dayNumber = useMemo(() => format(day, 'd'), [day]);
+  
+  // 기념일 필터링
+  const anniversaries = useMemo(() => {
+    const dailyAnnis = items.filter(item => item.type === 'anniversary');
+    const currentMonthDay = format(day, 'MM-dd');
+    const recurringAnnis: EntryItem[] = [];
+    
+    Object.keys(allEntries).forEach(dateStr => {
+      if (dateStr === formattedDate) return;
+      if (dateStr.endsWith(currentMonthDay)) {
+        const annis = allEntries[dateStr].filter(item => item.type === 'anniversary' && item.is_recurring);
+        recurringAnnis.push(...annis);
+      }
+    });
+    
+    return [...dailyAnnis, ...recurringAnnis];
+  }, [items, allEntries, day, formattedDate]);
+
+  // 일기/할 일 정렬 (시작일이 빠를수록 우선, 그 다음 기간형 우선)
+  const nonAnniversaryItems = useMemo(() => {
+    return items
+      .filter(item => item.type !== 'anniversary')
+      .sort((a, b) => {
+        // 1. 시작일 기준 정렬 (오래된 순)
+        const aStart = a.start_date || '9999-99-99';
+        const bStart = b.start_date || '9999-99-99';
+        
+        if (aStart !== bStart) {
+          return aStart.localeCompare(bStart);
+        }
+
+        // 2. 시작일이 같으면 기간형을 우선
+        const aIsRange = a.type === 'todo' && a.start_date && a.end_date && a.start_date !== a.end_date;
+        const bIsRange = b.type === 'todo' && b.start_date && b.end_date && b.start_date !== b.end_date;
+        
+        if (aIsRange && !bIsRange) return -1;
+        if (!aIsRange && bIsRange) return 1;
+        
+        // 3. 나머지는 ID로 고정 순서 유지
+        return a.id.localeCompare(b.id);
+      });
+  }, [items]);
+
   const { isOver, setNodeRef } = useDroppable({
     id: `droppable-${formattedDate}`,
     data: { date: formattedDate }
   });
 
+  const glowStyle = anniversaries.length > 0 ? {
+    '--anni-color': anniversaries[0].color,
+  } as React.CSSProperties : {};
+
   return (
     <div
       ref={setNodeRef}
-      className={`calendar-day ${!isCurrentMonth ? 'not-current-month' : ''} ${isToday ? 'today' : ''} ${isOver ? 'drag-over' : ''}`}
+      className={`calendar-day ${!isCurrentMonth ? 'not-current-month' : ''} ${isToday ? 'today' : ''} ${isOver ? 'drag-over' : ''} ${anniversaries.length > 0 ? 'has-anniversary' : ''}`}
       onClick={() => onClick(day)}
     >
-      <span className="day-number">{dayNumber}</span>
+      <div className="day-number-wrapper">
+        <span className="day-number" style={glowStyle}>{dayNumber}</span>
+        {anniversaries.length > 0 && (
+          <div className="anniversary-badge-group">
+            {anniversaries.map((anni, idx) => {
+              const Icon = ANNIVERSARY_ICONS[anni.icon || 'Gift'] || Gift;
+              return (
+                <div 
+                  key={`${anni.id}-${idx}`} 
+                  className="floating-anni-icon-wrapper"
+                  style={{ color: anni.color }}
+                  title={anni.title}
+                >
+                  <Icon size={14} className="floating-anni-icon" />
+                </div>
+              );
+            })}
+          </div>
+        )}
+      </div>
+
       <div className="entry-list-summary">
-        {items.slice(0, 3).map((item) => (
-          <DraggableEntry key={item.id} item={item} date={formattedDate} />
+        {nonAnniversaryItems.slice(0, 4).map((item) => (
+          <DraggableEntry activate={item.start_date === item.end_date} key={item.id} item={item} date={formattedDate} />
+          
         ))}
-        {items.length > 3 && <div className="summary-item more-indicator">+{items.length - 3}개 더보기</div>}
+        {nonAnniversaryItems.length > 4 && <div className="summary-item more-indicator">+{nonAnniversaryItems.length - 4}개 더보기</div>}
       </div>
     </div>
   );
@@ -107,6 +234,22 @@ const DiaryCalendar: React.FC = () => {
   const moveItem = useDiaryStore(state => state.moveItem);
 
   const navigationDate = useUIStore(state => state.navigationDate);
+  const setModalOpen = useUIStore(state => state.setModalOpen);
+
+  // 모달 상태 변경 시 스크롤 잠금 제어
+  useEffect(() => {
+    if (isModalOpen) {
+      setModalOpen(true);
+      return () => setModalOpen(false);
+    }
+  }, [isModalOpen, setModalOpen]);
+
+  useEffect(() => {
+    if (isJumpModalOpen) {
+      setModalOpen(true);
+      return () => setModalOpen(false);
+    }
+  }, [isJumpModalOpen, setModalOpen]);
 
   // 외부(사이드바 등)에서의 날짜 이동 요청 처리
   useEffect(() => {
@@ -238,6 +381,7 @@ const DiaryCalendar: React.FC = () => {
                 isCurrentMonth={isSameMonth(day, monthStart)}
                 isToday={isSameDay(day, new Date())}
                 items={entries[format(day, 'yyyy-MM-dd')] || []}
+                allEntries={entries}
                 onClick={onDateClick}
               />
             ))}

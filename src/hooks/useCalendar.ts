@@ -20,13 +20,13 @@ export const useCalendar = (initialDate: Date = new Date()) => {
     if (viewMode === 'calendar') {
       setAnimationClass('slide-left');
       setTimeout(() => {
-        setCurrentMonth((prev) => addMonths(prev, 1));
+        setCurrentMonth((next) => addMonths(next, 1));
         setAnimationClass('');
       }, 50);
     } else if (viewMode === 'years') {
-      setCurrentMonth((prev) => addMonths(prev, 12));
+      setCurrentMonth((next) => addMonths(next, 1 * 12));  // 1년 이동
     } else if (viewMode === 'months') {
-      setCurrentMonth((prev) => addMonths(prev, 1));
+      setCurrentMonth((next) => addMonths(next, 1));      // 1개월 이동
     }
   }, [viewMode]);
 
@@ -38,7 +38,7 @@ export const useCalendar = (initialDate: Date = new Date()) => {
         setAnimationClass('');
       }, 50);
     } else if (viewMode === 'years') {
-      setCurrentMonth((prev) => subMonths(prev, 12));
+      setCurrentMonth((prev) => subMonths(prev, 1 * 12));
     } else if (viewMode === 'months') {
       setCurrentMonth((prev) => subMonths(prev, 1));
     }
