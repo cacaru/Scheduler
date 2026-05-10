@@ -24,7 +24,7 @@
 
 1. **저장소 클론**
    ```bash
-   git clone https://github.com/your-username/Scheduler.git
+   git clone https://github.com/cacaru/Scheduler.git
    ```
 
 2. **의존성 설치**
