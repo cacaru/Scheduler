@@ -1,0 +1,206 @@
+.side-detail-type-badge {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  border-radius: 12px;
+  border-width: 2px;
+  border-style: solid;
+  font-size: 0.7rem;
+  font-weight: 800;
+  width: fit-content;
+}
+
+.side-detail-type-badge span {
+  color: black;
+}
+
+[data-theme='dark'] .side-detail-type-badge span {
+  color: white;
+}
+
+.side-detail-date-wrapper {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.side-detail-date-text {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--accent);
+}
+
+.side-detail-item {
+  margin-bottom: 1.5rem;
+}
+
+.side-detail-item label {
+  display: block;
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--text-muted);
+  margin-bottom: 8px;
+  margin-left: 4px;
+}
+
+.side-location-info-badge {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 12px;
+  background: #f1f5f9;
+  border-radius: 12px;
+  font-size: 0.85rem;
+  color: var(--text-main);
+  margin-bottom: 12px;
+  width: fit-content;
+}
+
+[data-theme='dark'] .side-location-info-badge {
+  background: #1a1b26;
+}
+
+.side-detail-map-wrapper {
+  overflow: hidden;
+  border-radius: 20px;
+  border: 1px solid var(--sidebar-border);
+}
+
+.side-detail-content-text {
+  background: #f8fafc;
+  padding: 20px;
+  border-radius: 20px;
+  line-height: 1.7;
+  color: var(--text-main);
+  font-size: 1rem;
+  border: 1px solid var(--sidebar-border);
+  white-space: pre-wrap;
+  max-height: calc(1.7rem * 10 + 40px); /* 1.7 line-height * 10 lines + 40px padding */
+  overflow-y: auto;
+  scrollbar-width: thin;
+}
+
+[data-theme='dark'] .side-detail-content-text {
+  background: #1a1b26;
+  border-color: #292e42;
+}
+
+.side-detail-footer-btn-wrapper {
+  display: flex;
+}
+
+.side-navigate-date-btn {
+  padding: 6px 12px;
+  border-radius: 8px;
+  border: none;
+  font-size: 0.75rem;
+  font-weight: 700;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+  color: white;
+  transition: all 0.2s;
+}
+
+.side-navigate-date-btn:hover {
+  opacity: 0.9;
+  transform: translateY(-1px);
+}
+
+.side-navigate-date-btn.primary {
+  background: var(--accent);
+}
+
+.side-navigate-date-btn.heavy {
+  background: var(--accent-heavy);
+}
+
+/* Modal Shell Styles moved from Sidebar */
+.side-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: transparent;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2000;
+  pointer-events: none;
+}
+
+.side-todo-modal {
+  pointer-events: auto;
+  background: white;
+  width: 90%;
+  max-width: 500px;
+  max-height: 90vh;
+  border-radius: 32px;
+  padding: 2rem;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.15);
+  overflow-y: auto;
+  position: relative;
+  border: 1px solid var(--sidebar-border);
+  animation: modalScaleUp 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.side-detail-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 2rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid var(--sidebar-border);
+}
+
+.side-detail-header-left {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 0;
+}
+
+.side-detail-header-left h4 {
+  margin: 0;
+  font-size: 1.4rem;
+  font-weight: 900;
+  color: var(--text-main);
+}
+
+.side-close-btn {
+  background: var(--sidebar-item-hover);
+  border: none;
+  cursor: pointer;
+  color: var(--text-muted);
+  width: 32px;
+  height: 32px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.side-close-btn:hover {
+  background: var(--accent-light);
+  color: var(--accent);
+  transform: scale(1.2);
+}
+
+.side-detail-footer {
+  display: flex;
+  justify-content: space-between;
+  padding-top: 5%;
+}
+
+@keyframes modalScaleUp {
+  from { opacity: 0; transform: scale(0.95); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+[data-theme='dark'] .side-todo-modal {
+  background: #24283b;
+  border-color: #292e42;
+}

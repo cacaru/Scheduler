@@ -1,0 +1,332 @@
+/* ============================================================
+   1. 다이어리 컨테이너 레이아웃
+   ============================================================ */
+
+.diaryContainer {
+  width: 100%;
+  max-width: 1400px;
+  min-width: 400px;
+  margin: 0 auto;
+  padding: clamp(10px, 2vw, 20px);
+  display: flex;
+  flex-direction: column;
+  box-sizing: border-box;
+  background: var(--bg);
+  flex: 1;
+}
+
+
+/* ============================================================
+   2. 달력 헤더 및 네비게이션
+   ============================================================ */
+
+.calendarHeader {
+  flex-shrink: 0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: clamp(15px, 2.5vw, 25px);
+  background: var(--surface);
+  padding: clamp(10px, 1.5vw, 15px) clamp(15px, 3vw, 30px);
+  border-radius: 20px;
+  box-shadow: var(--shadow-sm);
+  border: 1px solid var(--border);
+}
+
+.calendarHeader h2 {
+  margin: 0;
+  font-size: clamp(1.2rem, 2.5vw, 1.8rem);
+  color: var(--text-h);
+  font-weight: 900;
+  letter-spacing: -0.02em;
+  font-family: var(--font-body);
+}
+
+.clickableHeader {
+  cursor: pointer;
+  transition: opacity 0.2s;
+}
+
+.clickableHeader:hover {
+  opacity: 0.7;
+}
+
+/* Header Navigation Buttons */
+.navBtn {
+  width: clamp(36px, 4vw, 48px);
+  height: clamp(36px, 4vw, 48px);
+  border-radius: 50%;
+  border: none;
+  background: var(--accent-light);
+  color: var(--accent);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s cubic-bezier(0.23, 1, 0.32, 1);
+}
+
+.navBtn:hover { 
+  background: var(--accent); 
+  color: white; 
+  transform: scale(1.1);
+  box-shadow: 0 4px 15px rgba(184, 193, 236, 0.4);
+}
+
+
+/* ============================================================
+   3. 달력 wrapper 및 그리드 설정
+   ============================================================ */
+
+.calendarWrapper {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  background: var(--surface);
+  border-radius: 32px;
+  box-shadow: var(--shadow-md);
+  overflow: hidden;
+  border: 1px solid var(--border);
+  position: relative;
+}
+
+/* Day Names Row (Sun, Mon, ...) */
+.calendarGrid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  background: var(--surface);
+  opacity: 0.9;
+  border-bottom: 1px solid var(--border);
+}
+
+.calendarDayName {
+  padding: clamp(10px, 1.8vw, 18px);
+  text-align: center;
+  font-weight: 800;
+  font-size: clamp(0.7rem, 1.2vw, 0.9rem);
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  font-family: var(--font-body);
+}
+
+/* Calendar Days Content Grid */
+.calendarContent {
+  flex: 1;
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  grid-template-rows: repeat(6, 1fr);
+  min-height: 0;
+}
+
+
+/* ============================================================
+   4. 날짜 카드 스타일
+   ============================================================ */
+
+.calendarDay {
+  border: 0.5px solid var(--border);
+  padding: clamp(4px, 1.2vw, 12px);
+  min-width: 0;
+  min-height: clamp(60px, 12vh, 120px);
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  transition: all 0.2s ease;
+  overflow: hidden;
+}
+
+.calendarDay:hover { 
+  background: var(--bg); 
+  box-shadow: inset 0 0 0 1.5px var(--accent-light); 
+}
+
+/* 드래그 앤 드롭 시 마그네틱 효과 (Drop-ready) */
+.calendarDay.dragOver {
+  background: var(--accent-light);
+  box-shadow: inset 0 0 0 2px var(--accent), 0 0 20px rgba(184, 193, 236, 0.3);
+  transform: translateY(-2px);
+  z-index: 10;
+}
+
+.calendarDay.notCurrentMonth {
+  opacity: 0.2;
+}
+
+/* Day Number Styling */
+.dayNumberWrapper {
+  display: flex;
+  justify-content: flex-start;
+  margin-bottom: clamp(4px, 1vw, 8px);
+  margin-top: 4px;
+  position: relative;
+  z-index: 5;
+}
+
+.dayNumber {
+  font-weight: 700;
+  font-size: clamp(0.8rem, 1.5vw, 1rem);
+  color: var(--text-h);
+  width: clamp(22px, 3vw, 28px);
+  height: clamp(22px, 3vw, 28px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  transition: all 0.3s ease;
+  position: relative;
+  z-index: 2;
+  font-family: var(--font-body);
+}
+
+/* Highlight for Today */
+.calendarDay.today .dayNumber {
+  background: var(--accent);
+  color: white;
+  width: clamp(22px, 3vw, 28px);
+  height: clamp(22px, 3vw, 28px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+}
+
+
+/* ============================================================
+   5. 기념일 스타일
+   ============================================================ */
+
+.calendarDay {
+  position: relative;
+}
+
+/* Option 1: Background Gradient for Anniversary Days */
+.calendarDay.hasAnniversary {
+  background: linear-gradient(135deg, var(--surface) 60%, rgba(255, 173, 173, 0.08) 100%);
+}
+
+.calendarDay.hasAnniversary:hover {
+  background: linear-gradient(135deg, var(--bg) 60%, rgba(255, 173, 173, 0.15) 100%);
+}
+
+/* Floating Icon Badge Group */
+.anniversaryBadgeGroup {
+  display: flex;
+  gap: 4px;
+  margin-left: 6px;
+  align-items: center;
+}
+
+.floatingAnniIconWrapper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  animation: float 3s ease-in-out infinite;
+  filter: drop-shadow(0 2px 4px rgba(0,0,0,0.1));
+}
+
+.floatingAnniIconWrapper:nth-child(even) {
+  animation-delay: 1.5s;
+}
+
+.floatingAnniIcon {
+  stroke-width: 2.5px;
+}
+
+/* Day Number Highlight */
+.calendarDay.hasAnniversary .dayNumber {
+  color: var(--anni-color, var(--text-h));
+  font-weight: 900;
+  text-shadow: 0 0 10px rgba(255, 255, 255, 0.8);
+}
+
+/* Today + Anniversary Overlap */
+.calendarDay.today.hasAnniversary .dayNumber {
+  background: var(--accent);
+  color: white;
+  box-shadow: 0 4px 12px rgba(184, 193, 236, 0.4);
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-3px); }
+}
+
+
+/* ============================================================
+   6. 할일 및 일기 항목 정렬
+   ============================================================ */
+
+.entryListSummary {
+  display: flex;
+  flex-direction: column;
+  gap: 0px;
+  overflow: visible;
+}
+
+.summaryItem {
+  font-size: clamp(0.7rem, 1.2vw, 1rem);
+  padding: clamp(2px, 0.4vw, 4px) clamp(4px, 0.8vw, 10px);
+  border-radius: clamp(4px, 0.8vw, 8px);
+  margin-bottom: clamp(2px, 0.4vw, 4px);
+  background: var(--bg);
+  border-left: clamp(2px, 0.4vw, 4px) solid var(--accent);
+  box-shadow: 0 2px 5px rgba(0,0,0,0.03);
+  font-weight: 600;
+  color: var(--text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  transition: transform 0.2s, box-shadow 0.2s;
+  font-family: var(--font-body);
+}
+
+.summaryItem.rangeItem {
+  box-shadow: none;
+  border-left-width: 0;
+}
+
+.summaryItem.completed {
+  opacity: 0.5;
+  text-decoration: line-through;
+}
+
+.draggingPreview {
+  transform: scale(1.2);
+  box-shadow: 0 15px 35px rgba(0, 0, 0, 0.15);
+  z-index: 1000;
+  cursor: grabbing;
+  opacity: 0.9;
+}
+
+
+/* ============================================================
+   7. 반응형 아이콘 표시
+   ============================================================ */
+
+/* Swipe/Drag Visual Indicators */
+.swipeIndicator {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 50;
+  pointer-events: none;
+  background: rgba(184, 193, 236, 0.2);
+  border-radius: 50%;
+  width: clamp(60px, 10vw, 100px);
+  height: clamp(60px, 10vw, 100px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--accent);
+  transition: opacity 0.1s ease;
+}
+
+.swipeIndicator.left {
+  left: clamp(10px, 4vw, 40px);
+}
+
+.swipeIndicator.right {
+  right: clamp(10px, 4vw, 40px);
+}

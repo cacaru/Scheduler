@@ -1,0 +1,103 @@
+/* ============================================================
+   1. 미니 달력 컨테이너 (MINI CALENDAR CONTAINER)
+   ============================================================ */
+
+.miniCalendar {
+  background: var(--bg);
+  border: 2px solid var(--border);
+  border-radius: 20px;
+  padding: 16px;
+}
+
+
+/* ============================================================
+   2. 미니 달력 헤더 - 월/연도 (HEADER)
+   ============================================================ */
+
+.miniCalHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+
+.miniCalHeader span {
+  font-size: 0.9rem;
+  font-weight: 800;
+  color: var(--text-h);
+}
+
+/* 헤더 내비게이션 버튼 */
+.miniCalHeader button {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  width: 28px;
+  height: 28px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.miniCalHeader button:hover {
+  background: var(--bg);
+  color: var(--text-h);
+}
+
+
+/* ============================================================
+   3. 그리드 구조 및 요일명 (GRID & DAY NAMES)
+   ============================================================ */
+
+.miniCalGrid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 4px;
+}
+
+.miniCalDayName {
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: var(--text-muted);
+  text-align: center;
+  padding-bottom: 8px;
+}
+
+
+/* ============================================================
+   4. 개별 날짜 스타일 (DAY STYLES)
+   ============================================================ */
+
+.miniCalDay {
+  aspect-ratio: 1;
+  border: none;
+  background: transparent;
+  border-radius: 10px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--text);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+}
+
+/* 호버 및 활성화 상태 */
+.miniCalDay:hover:not(.active) {
+  background: var(--accent-light);
+}
+
+.miniCalDay.active {
+  color: white;
+  background: var(--accent);
+}
+
+/* 다른 달의 날짜 */
+.miniCalDay.otherMonth {
+  color: var(--text-muted);
+  opacity: 0.5;
+}

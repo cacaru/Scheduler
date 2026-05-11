@@ -1,0 +1,696 @@
+/* ============================================================
+   1. 사이드바 글로벌 변수 및 Z-INDEX (GLOBAL VARS)
+   ============================================================ */
+
+:root {
+  --sidebar-width: 280px;
+  --sidebar-bg: #ffffff;
+  --sidebar-border: #f1f5f9;
+  --sidebar-item-hover: #f8fafc;
+  --text-main: #1e293b;
+  --text-muted: #64748b;
+  --shadow-soft: 0 10px 25px -5px rgba(0, 0, 0, 0.05);
+  
+  /* 레이어 관리 */
+  --z-overlay: 1000;
+  --z-sidebar: 1001;
+  --z-modal: 2000;
+}
+
+
+/* ============================================================
+   2. 커스텀 스크롤바 (CUSTOM SCROLLBARS)
+   ============================================================ */
+
+.sideMenuNav::-webkit-scrollbar,
+.sideExtensionContent::-webkit-scrollbar,
+.sideTodoModal::-webkit-scrollbar {
+  width: 6px;
+}
+
+.sideMenuNav::-webkit-scrollbar-thumb,
+.sideExtensionContent::-webkit-scrollbar-thumb,
+.sideTodoModal::-webkit-scrollbar-thumb {
+  background: #e2e8f0;
+  border-radius: 10px;
+}
+
+.sideMenuNav::-webkit-scrollbar-track,
+.sideExtensionContent::-webkit-scrollbar-track,
+.sideTodoModal::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+
+/* ============================================================
+   3. 오버레이 및 컨테이너 (OVERLAY & CONTAINER)
+   ============================================================ */
+
+.sideSidebarOverlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.15);
+  backdrop-filter: blur(4px);
+  z-index: var(--z-overlay);
+  opacity: 0;
+  visibility: hidden;
+  transition: all 0.3s ease;
+}
+
+.sideSidebarOverlay.open {
+  opacity: 1;
+  visibility: visible;
+}
+
+.sideSidebarContainer {
+  position: fixed;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  display: flex;
+  z-index: var(--z-sidebar);
+  transform: translateX(-100%);
+  transition: transform 0.4s cubic-bezier(0.23, 1, 0.32, 1);
+}
+
+.sideSidebarContainer.open {
+  transform: translateX(0);
+}
+
+
+/* ============================================================
+   4. 1단계: 메인 사이드 메뉴 (MAIN SIDE MENU)
+   ============================================================ */
+
+.sideMenu {
+  width: var(--sidebar-width);
+  background-color: var(--sidebar-bg);
+  border-right: 1px solid var(--sidebar-border);
+  display: flex;
+  flex-direction: column;
+  box-shadow: 10px 0 40px rgba(0,0,0,0.03);
+  position: relative;
+}
+
+/* 메뉴 헤더 */
+.sideMenuHeader {
+  padding: 2rem 1.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.sideMenuHeader span {
+  font-family: var(--font-title);
+}
+
+.sideLogo {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-weight: 900;
+  font-size: 1.2rem;
+  color: var(--accent);
+}
+
+.sideCloseBtn {
+  background: var(--sidebar-item-hover);
+  border: none;
+  cursor: pointer;
+  color: var(--text-muted);
+  width: 32px;
+  height: 32px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.sideCloseBtn:hover {
+  background: var(--accent-light);
+  color: var(--accent);
+  transform: scale(1.2);
+}
+
+/* 메뉴 바디 및 내비게이션 */
+.sideMenuBody {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.sideMenuNav {
+  padding: 1.5rem 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  flex: 1;
+  overflow-y: auto;
+  scrollbar-width: thin;
+}
+
+.sideMenuNav span {
+  font-family: var(--font-title);
+}
+
+.sideNavDivider {
+  height: 1px;
+  background: var(--sidebar-border);
+  margin: 0.5rem 1rem;
+  flex-shrink: 0;
+}
+
+/* 내비게이션 아이템 스타일 */
+.sideMenuItem {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  padding: 14px 18px;
+  border-radius: 16px;
+  border: none;
+  background: transparent;
+  color: var(--text-muted);
+  font-weight: 700;
+  font-size: 1rem;
+  transition: all 0.2s ease;
+  cursor: pointer;
+  text-align: left;
+  width: 100%;
+  position: relative;
+}
+
+.sideMenuItem:hover {
+  background: var(--sidebar-item-hover);
+  color: var(--text-main);
+  transform: translateX(4px);
+}
+
+.sideMenuItem:active {
+  transform: translateX(2px) scale(0.98);
+}
+
+.sideMenuItem.active {
+  background: var(--accent-light);
+  color: var(--accent);
+}
+
+.sideMenuItem.logoutBtn {
+  margin-top: auto;
+  color: #e53e3e;
+}
+
+.sideMenuItem.logoutBtn:hover {
+  background: #fff5f5;
+  color: #c53030;
+}
+
+.sideMenuItem svg {
+  flex-shrink: 0;
+}
+
+.sideMenuItem .arrow {
+  margin-left: auto;
+  transition: transform 0.3s ease;
+  opacity: 0.5;
+}
+
+.sideMenuItem .arrow.rotated {
+  transform: rotate(90deg);
+  opacity: 1;
+}
+
+
+/* ============================================================
+   5. 푸터 및 설정 아코디언 (FOOTER & SETTINGS)
+   ============================================================ */
+
+.sideMenuFooter {
+  padding: 1rem;
+  border-top: 1px solid var(--sidebar-border);
+  background: #fdfdfd;
+}
+
+.sideSettingsAccordion {
+  display: flex;
+  flex-direction: column;
+}
+
+.sideSettingsContent {
+  max-height: 0;
+  overflow: hidden;
+  transition: all 0.3s cubic-bezier(0.23, 1, 0.32, 1);
+  opacity: 0;
+}
+
+.sideSettingsAccordion.expanded .sideSettingsContent {
+  max-height: 200px;
+  opacity: 1;
+  padding: 1rem 0.5rem 0.5rem;
+}
+
+.sideSettingRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1.5rem;
+}
+
+/* 테마 전환 스위치 */
+.themeToggleSwitch {
+  width: 48px;
+  height: 24px;
+  background: var(--sidebar-border);
+  border-radius: 20px;
+  padding: 3px;
+  cursor: pointer;
+  border: none;
+  position: relative;
+  transition: background 0.3s;
+}
+
+.switchKnob {
+  width: 18px;
+  height: 18px;
+  background: white;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--accent);
+  transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+
+.switchKnob.active {
+  transform: translateX(24px);
+  background: var(--surface);
+  color: #fbbf24;
+}
+
+
+/* ============================================================
+   6. 2단계: 할 일 / 일기 확장 패널 (EXTENSION PANEL)
+   ============================================================ */
+
+.sideTodoExtension {
+  width: 0;
+  background-color: #fcfdfe;
+  border-right: 1px solid var(--sidebar-border);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  transition: width 0.4s cubic-bezier(0.23, 1, 0.32, 1);
+  box-shadow: inset 10px 0 20px rgba(0,0,0,0.01);
+  position: relative;
+}
+
+.sideTodoExtension.resizing {
+  transition: none;
+}
+
+/* 패널 리사이저 */
+.sideExtensionResizer {
+  position: absolute;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  width: 4px;
+  cursor: ew-resize;
+  z-index: 10;
+}
+
+.sideExtensionResizer:hover {
+  background: var(--accent);
+  opacity: 0.5;
+}
+
+/* 확장 패널 헤더 */
+.sideExtensionHeader {
+  padding: 1.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid var(--sidebar-border);
+}
+
+.sideExtensionHeader h3 {
+  margin: 0;
+  font-size: 1.1rem;
+  font-weight: 900;
+  color: var(--text-main);
+}
+
+/* 확장 패널 콘텐츠 */
+.sideExtensionContent {
+  flex: 1;
+  overflow-y: auto;
+  padding: 1.5rem;
+}
+
+
+/* ============================================================
+   7. 리스트 그룹화 및 아이템 (LIST ITEMS)
+   ============================================================ */
+
+/* 월별 그룹 */
+.sideMonthGroup {
+  margin-bottom: 1.5rem;
+}
+
+.sideMonthHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 15px 12px;
+  background: var(--sidebar-item-hover);
+  border-radius: 10px;
+  cursor: pointer;
+  margin-bottom: 0.75rem;
+  transition: all 0.2s ease;
+}
+
+.sideMonthHeader:hover {
+  background: var(--accent-light);
+}
+
+.sideMonthTitle {
+  font-size: 1rem;
+  color: var(--accent-heavy);
+  font-weight: 800;
+}
+
+.sideMonthArrow {
+  color: var(--accent);
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  opacity: 0.6;
+}
+
+.sideMonthArrow.rotated {
+  transform: rotate(90deg);
+}
+
+.sideMonthContent {
+  max-height: 0;
+  overflow: hidden;
+  transition: all 0.4s ease;
+  opacity: 0;
+}
+
+.sideMonthGroup.expanded .sideMonthContent {
+  max-height: 5000px;
+  opacity: 1;
+}
+
+/* Range Group Styling */
+.rangeGroup {
+  border-left: 2px solid var(--accent) !important;
+  background: var(--accent-light);
+  border-radius: 12px;
+  padding: 10px !important;
+}
+
+.rangeBadge {
+  color: var(--accent-heavy) !important;
+  margin-bottom: 15px !important;
+}
+
+.sideRangeItemWrapper {
+  margin-bottom: 12px;
+}
+
+.sideRangeDuration {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.7rem;
+  font-weight: 800;
+  color: var(--accent-heavy);
+  margin-bottom: 4px;
+  margin-left: 5px;
+  opacity: 0.8;
+}
+
+
+.sideDateBadge {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--text-muted);
+  margin-bottom: 12px;
+}
+
+/* 아이템 리스트 */
+.sideTodoList {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+/* 개별 아이템 카드 */
+.sideTodoItem {
+  background: white;
+  border: 1px solid var(--sidebar-border);
+  border-radius: 16px;
+  padding: 12px 14px;
+  margin-bottom: 10px;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  cursor: pointer;
+  position: relative;
+}
+
+.sideTodoItem:hover {
+  border-color: var(--accent);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.03);
+  transform: translateY(-1px);
+}
+
+.sideTodoItem.selected {
+  border-color: var(--accent);
+  background: var(--accent-light);
+}
+
+.sideTodoItem.completed .sideTodoTitle {
+  text-decoration: line-through;
+  opacity: 0.5;
+}
+
+.sideTodoItemHeader {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+}
+
+.sideTodoToggleBtn {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.sideTodoTitle {
+  flex: 1;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--text-main);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  margin: 0;
+}
+
+.sideTodoEditBtn {
+  background: var(--sidebar-item-hover);
+  border: none;
+  cursor: pointer;
+  color: var(--text-muted);
+  width: 28px;
+  height: 28px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+  opacity: 0;
+}
+
+.sideTodoItem:hover .sideTodoEditBtn {
+  opacity: 1;
+}
+
+
+/* ============================================================
+   8. 3단계: 할 일 상세 모달 (TODO DETAIL MODAL)
+   ============================================================ */
+
+.sideModalOverlay {
+  position: fixed;
+  inset: 0;
+  background: transparent;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: var(--z-modal);
+  pointer-events: none;
+}
+
+.sideTodoModal {
+  pointer-events: auto;
+  background: white;
+  width: 90%;
+  max-width: 500px;
+  max-height: 90vh;
+  border-radius: 32px;
+  padding: 2rem;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.15);
+  overflow-y: auto;
+  position: relative;
+  border: 1px solid var(--sidebar-border);
+  animation: modalScaleUp 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.sideTodoModal::-webkit-scrollbar {
+  display: none;
+}
+
+/* 상세 정보 헤더 */
+.sideDetailHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 2rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid var(--sidebar-border);
+}
+
+.sideDetailHeaderLeft {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 0;
+}
+
+.sideDetailHeaderLeft h4 {
+  margin: 0;
+  font-size: 1.4rem;
+  font-weight: 900;
+  color: var(--text-main);
+}
+
+.sideDetailFooter {
+  display: flex;
+  justify-content: space-between;
+  padding-top: 5%;
+}
+
+/* ============================================================
+   9. 로그아웃 확인 모달 (LOGOUT CONFIRMATION)
+   ============================================================ */
+
+.logoutConfirmOverlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.4);
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 3000;
+  animation: fadeIn 0.2s ease;
+}
+
+.logoutConfirmModal {
+  background: white;
+  padding: 2rem;
+  border-radius: 24px;
+  width: 90%;
+  max-width: 360px;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+  text-align: center;
+}
+
+.logoutConfirmButtons {
+  display: flex;
+  gap: 12px;
+}
+
+.logoutConfirmButtons button {
+  flex: 1;
+  padding: 12px;
+  border-radius: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s;
+  border: none;
+}
+
+.logoutBtnCancel { background: #f1f5f9; color: #64748b; }
+.logoutBtnConfirm { background: #ef4444; color: white; }
+
+
+/* ============================================================
+   10. 다크 모드 오버라이드 - 사이드바 (DARK MODE OVERRIDES)
+   ============================================================ */
+
+[data-theme='dark'] {
+  --sidebar-bg: #1e1e2e;
+  --sidebar-border: #2e2e3e;
+  --sidebar-item-hover: #2a2a3a;
+  --text-main: #e0e0e0;
+  --text-muted: #94a3b8;
+}
+
+[data-theme='dark'] .sideMenuFooter { background: #1e1e2e; }
+[data-theme='dark'] .sideTodoExtension { background-color: #1a1b26; }
+
+[data-theme='dark'] .sideTodoItem,
+[data-theme='dark'] .sideTodoModal,
+[data-theme='dark'] .logoutConfirmModal {
+  background: #24283b;
+  border-color: #292e42;
+}
+
+[data-theme='dark'] .sideDetailContentText {
+  background: #1a1b26;
+  border-color: #292e42;
+}
+
+[data-theme='dark'] .themeToggleSwitch {
+  background: var(--accent);
+}
+
+
+/* ============================================================
+   11. 반응형 미디어 쿼리 및 애니메이션 (RESPONSIVE)
+   ============================================================ */
+
+@media (max-width: 1024px) {
+  .sideMenu { width: 240px; }
+  .sideTodoExtension.visible { width: 300px; }
+}
+
+@media (max-width: 640px) {
+  .sideTodoModal {
+    padding: 1.5rem;
+    width: 95%;
+  }
+}
+
+@keyframes modalScaleUp {
+  from { opacity: 0; transform: scale(0.95); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}

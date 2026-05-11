@@ -1,0 +1,147 @@
+/* ============================================================
+   1. 메인 앱 레이아웃 (MAIN APP LAYOUT)
+   ============================================================ */
+
+.appLayout {
+  display: flex;
+  width: 100%;
+  min-height: 100vh;
+  position: relative;
+  background: var(--bg);
+}
+
+/* 사이드바 토글 버튼 */
+.sideMenuToggleBtn {
+  position: fixed;
+  top: 20px;
+  left: 20px;
+  z-index: 100;
+  background: white;
+  border: 1px solid var(--border);
+  color: var(--accent);
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  transition: all 0.2s;
+}
+
+.sideMenuToggleBtn:hover {
+  background: var(--accent-light);
+  transform: translateY(-2px);
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+}
+
+/* 메인 콘텐츠 컨테이너 */
+.appContainer {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  padding: 40px 20px;
+  box-sizing: border-box;
+  background-color: var(--bg);
+}
+
+
+/* ============================================================
+   2 타이틀 타이포그래피 (TITLE)
+   ============================================================ */
+
+.titleText {
+  text-align: center;
+  margin-bottom: 2rem;
+}
+
+.titleText h1 {
+  margin: 0;
+  font-size: 2.8rem;
+  color: var(--accent);
+  font-weight: 800;
+  letter-spacing: -0.02em;
+}
+
+.titleText p {
+  font-family: var(--font-title);
+  color: var(--text);
+  font-size: 1.1rem;
+  margin-top: 0.5rem;
+  opacity: 0.7;
+}
+
+
+/* ============================================================
+   3. 달력 및 메인 섹션 (CALENDAR & MAIN)
+   ============================================================ */
+
+.calendarSection {
+  flex-grow: 1;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+}
+
+
+/* ============================================================
+   4. 푸터 및 장식 요소 (FOOTER & DECORATIVE)
+   ============================================================ */
+
+.appFooter {
+  margin-top: 40px;
+  width: 100%;
+}
+
+.footerContent {
+  padding: 20px 0;
+  text-align: center;
+  font-size: 0.9rem;
+  color: var(--text);
+  opacity: 0.5;
+}
+
+/* 장식용 눈금자 효과 */
+.ticks {
+  position: relative;
+  width: 100%;
+  border-top: 1px solid var(--border);
+}
+
+.ticks::before,
+.ticks::after {
+  content: '';
+  position: absolute;
+  top: -4.5px;
+  border: 5px solid transparent;
+}
+
+.ticks::before {
+  left: 0;
+  border-left-color: var(--border);
+}
+
+.ticks::after {
+  right: 0;
+  border-right-color: var(--border);
+}
+
+
+/* ============================================================
+   5. 반응형 브레이크포인트 (RESPONSIVE)
+   ============================================================ */
+
+@media (max-width: 768px) {
+  .appLayout {
+    flex-direction: column;
+  }
+
+  .titleText h1 {
+    font-size: 2rem;
+  }
+
+  .appContainer {
+    padding: 20px 10px;
+  }
+}
