@@ -1,6 +1,6 @@
 import { type StateCreator } from 'zustand';
-import { supabase } from '../../utils/supabase';
 import { type DiaryState } from '../diaryStore';
+import { getEntryRepository } from '../../repositories/entryRepository';
 import { getSafeEntries } from './baseSlice';
 
 export interface MovementSlice {
@@ -12,29 +12,26 @@ export const createMovementSlice: StateCreator<DiaryState, [], [], MovementSlice
   moveItem: async (id, fromDate, toDate) => {
     if (fromDate === toDate) return;
 
-    const { error } = await supabase
-      .from('entries')
-      .update({ date: toDate })
-      .eq('id', id);
-
-    if (error) {
-      console.error('Error moving item:', error);
+    try {
+      await getEntryRepository().update(id, { date: toDate });
+    } catch (err) {
+      console.error('Error moving item:', err);
       return;
     }
 
     set((state) => {
       const fromEntries = [...getSafeEntries(state.entries, fromDate)];
-      const itemIndex = fromEntries.findIndex((item) => item.id === id);
-      if (itemIndex === -1) return state;
-      
-      const [movedItem] = fromEntries.splice(itemIndex, 1);
+      const idx = fromEntries.findIndex((item) => item.id === id);
+      if (idx === -1) return state;
+
+      const [moved] = fromEntries.splice(idx, 1);
       const toEntries = getSafeEntries(state.entries, toDate);
-      
+
       return {
         entries: {
           ...state.entries,
           [fromDate]: fromEntries,
-          [toDate]: [...toEntries, movedItem],
+          [toDate]: [...toEntries, moved],
         },
       };
     });
@@ -45,12 +42,12 @@ export const createMovementSlice: StateCreator<DiaryState, [], [], MovementSlice
       const items = [...getSafeEntries(state.entries, date)];
       const oldIndex = items.findIndex((item) => item.id === activeId);
       const newIndex = items.findIndex((item) => item.id === overId);
-      
+
       if (oldIndex !== -1 && newIndex !== -1) {
-        const [movedItem] = items.splice(oldIndex, 1);
-        items.splice(newIndex, 0, movedItem);
+        const [moved] = items.splice(oldIndex, 1);
+        items.splice(newIndex, 0, moved);
       }
-      
+
       return {
         entries: {
           ...state.entries,

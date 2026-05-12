@@ -6,6 +6,8 @@ import { setStorageAdapter } from '@project/shared/src/adapters/storage';
 import { setThemeApplier } from '@project/shared/src/adapters/theme';
 import { initSupabaseClient } from '@project/shared/src/utils/supabase';
 import { hydrateUIStore } from '@project/shared/src/store/uiStore';
+import { setEntryRepository } from '@project/shared/src/repositories/entryRepository';
+import { remoteEntryRepository } from '@project/shared/src/repositories/remoteEntryRepository';
 import { webStorageAdapter } from './storage';
 import { webThemeApplier } from './theme';
 
@@ -20,6 +22,9 @@ export function bootstrapWebPlatform(): void {
   } else {
     initSupabaseClient(url, anonKey);
   }
+
+  // 웹은 항상 Supabase 직결 — 오프라인 캐시는 모바일 전용
+  setEntryRepository(remoteEntryRepository);
 
   hydrateUIStore();
 }

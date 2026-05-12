@@ -1,7 +1,9 @@
 import { type StateCreator } from 'zustand';
-import { supabase } from '../../utils/supabase';
 import { type EntryItem, type EntryType, type DiaryState } from '../diaryStore';
 import { useUIStore } from '../uiStore';
+import { useAuthStore } from '../authStore';
+import { getEntryRepository, type RawEntry } from '../../repositories/entryRepository';
+import { uuid } from '../../utils/uuid';
 import { eachDayOfInterval, format, parseISO } from 'date-fns';
 
 export interface BaseSlice {
@@ -9,13 +11,13 @@ export interface BaseSlice {
   isLoading: boolean;
   fetchEntries: () => Promise<void>;
   addItem: (
-    date: string, 
-    type: EntryType, 
-    title: string, 
-    content: string, 
-    color?: string, 
-    location?: EntryItem['location'], 
-    is_recurring?: boolean, 
+    date: string,
+    type: EntryType,
+    title: string,
+    content: string,
+    color?: string,
+    location?: EntryItem['location'],
+    is_recurring?: boolean,
     icon?: string,
     start_date?: string,
     end_date?: string
@@ -29,65 +31,60 @@ export const getSafeEntries = (entries: Record<string, EntryItem[]>, date: strin
   return Array.isArray(existing) ? existing : [];
 };
 
+/** Raw row → 화면용 EntryItem 변환 */
+function toEntryItem(row: RawEntry): EntryItem {
+  return {
+    id: row.id,
+    type: row.type,
+    title: row.title,
+    content: row.content,
+    completed: row.completed ?? undefined,
+    color: row.color ?? undefined,
+    icon: row.icon ?? undefined,
+    is_recurring: row.is_recurring ?? undefined,
+    location: row.location ?? undefined,
+    start_date: row.start_date ?? undefined,
+    end_date: row.end_date ?? undefined,
+  };
+}
+
+/** 날짜별 그룹핑. todo의 start_date~end_date는 모든 날짜로 펼친다. */
+function groupByDate(rows: RawEntry[]): Record<string, EntryItem[]> {
+  const grouped: Record<string, EntryItem[]> = {};
+  for (const row of rows) {
+    const entry = toEntryItem(row);
+
+    if (row.type === 'todo' && row.start_date && row.end_date) {
+      try {
+        const days = eachDayOfInterval({
+          start: parseISO(row.start_date),
+          end: parseISO(row.end_date),
+        });
+        for (const day of days) {
+          const dStr = format(day, 'yyyy-MM-dd');
+          if (!grouped[dStr]) grouped[dStr] = [];
+          grouped[dStr].push(entry);
+        }
+        continue;
+      } catch {
+        // 폴백 — 단일 날짜로 처리
+      }
+    }
+    if (!grouped[row.date]) grouped[row.date] = [];
+    grouped[row.date].push(entry);
+  }
+  return grouped;
+}
+
 export const createBaseSlice: StateCreator<DiaryState, [], [], BaseSlice> = (set) => ({
   entries: {},
   isLoading: false,
 
   fetchEntries: async () => {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) return;
-
       set({ isLoading: true });
-      const { data, error } = await supabase
-        .from('entries')
-        .select('*')
-        .order('created_at', { ascending: true });
-
-      if (error) throw error;
-      
-      const grouped: Record<string, EntryItem[]> = {};
-      
-      data.forEach((item: any) => {
-        const entry: EntryItem = {
-          id: item.id,
-          type: item.type,
-          title: item.title,
-          content: item.content,
-          completed: item.completed,
-          color: item.color,
-          icon: item.icon,
-          is_recurring: item.is_recurring,
-          location: item.location,
-          start_date: item.start_date,
-          end_date: item.end_date,
-        };
-
-        // 기간형 항목(todo) 처리
-        if (item.type === 'todo' && item.start_date && item.end_date) {
-          try {
-            const start = parseISO(item.start_date);
-            const end = parseISO(item.end_date);
-            const days = eachDayOfInterval({ start, end });
-            
-            days.forEach(day => {
-              const dateStr = format(day, 'yyyy-MM-dd');
-              if (!grouped[dateStr]) grouped[dateStr] = [];
-              grouped[dateStr].push(entry);
-            });
-          } catch (e) {
-            console.error('Error expanding date interval:', e);
-            if (!grouped[item.date]) grouped[item.date] = [];
-            grouped[item.date].push(entry);
-          }
-        } else {
-          // 단일 날짜 항목
-          if (!grouped[item.date]) grouped[item.date] = [];
-          grouped[item.date].push(entry);
-        }
-      });
-      
-      set({ entries: grouped });
+      const rows = await getEntryRepository().list();
+      set({ entries: groupByDate(rows) });
     } catch (err) {
       console.error('Error fetching entries:', err);
       useUIStore.getState().showToast('데이터를 불러오는 중 오류가 발생했습니다.', 'error');
@@ -98,64 +95,47 @@ export const createBaseSlice: StateCreator<DiaryState, [], [], BaseSlice> = (set
 
   addItem: async (date, type, title, content, color, location, is_recurring, icon, start_date, end_date) => {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
+      const user = useAuthStore.getState().user;
       if (!user) return;
 
-      const newItem: any = {
+      const id = uuid();
+      const row = await getEntryRepository().insert({
+        id,
         user_id: user.id,
         date,
         type,
         title,
         content,
-        completed: type === 'todo' ? false : undefined,
-        color,
-        is_recurring,
-        icon,
-        location,
-        start_date,
-        end_date,
-      };
+        completed: type === 'todo' ? false : null,
+        color: color ?? null,
+        icon: icon ?? null,
+        is_recurring: is_recurring ?? null,
+        location: location ?? null,
+        start_date: start_date ?? null,
+        end_date: end_date ?? null,
+      });
 
-      const { data, error } = await supabase
-        .from('entries')
-        .insert(newItem)
-        .select()
-        .single();
-
-      if (error) throw error;
-
-      const entry: EntryItem = {
-        id: data.id,
-        type: data.type,
-        title: data.title,
-        content: data.content,
-        completed: data.completed,
-        color: data.color,
-        icon: data.icon,
-        is_recurring: data.is_recurring,
-        location: data.location,
-        start_date: data.start_date,
-        end_date: data.end_date,
-      };
+      const entry = toEntryItem(row);
 
       set((state) => {
-        const nextEntries = { ...state.entries };
-        
-        if (type === 'todo' && start_date && end_date) {
+        const next = { ...state.entries };
+        if (row.type === 'todo' && row.start_date && row.end_date) {
           try {
-            const days = eachDayOfInterval({ start: parseISO(start_date), end: parseISO(end_date) });
-            days.forEach(day => {
-              const dStr = format(day, 'yyyy-MM-dd');
-              nextEntries[dStr] = [...getSafeEntries(nextEntries, dStr), entry];
+            const days = eachDayOfInterval({
+              start: parseISO(row.start_date),
+              end: parseISO(row.end_date),
             });
-          } catch (e) {
-            nextEntries[date] = [...getSafeEntries(nextEntries, date), entry];
+            for (const day of days) {
+              const dStr = format(day, 'yyyy-MM-dd');
+              next[dStr] = [...getSafeEntries(next, dStr), entry];
+            }
+          } catch {
+            next[date] = [...getSafeEntries(next, date), entry];
           }
         } else {
-          nextEntries[date] = [...getSafeEntries(nextEntries, date), entry];
+          next[date] = [...getSafeEntries(next, date), entry];
         }
-        
-        return { entries: nextEntries };
+        return { entries: next };
       });
       useUIStore.getState().showToast('성공적으로 추가되었습니다.', 'success');
     } catch (err) {
@@ -167,52 +147,45 @@ export const createBaseSlice: StateCreator<DiaryState, [], [], BaseSlice> = (set
 
   updateItem: async (_date, id, updates) => {
     try {
-      const { error } = await supabase
-        .from('entries')
-        .update(updates)
-        .eq('id', id);
-
-      if (error) throw error;
+      // EntryItem.location은 NonNullable이므로 별도 변환 필요 없음
+      await getEntryRepository().update(id, updates as Partial<RawEntry>);
 
       set((state) => {
-        const nextEntries = { ...state.entries };
-        
-        // 1. 모든 날짜에서 기존 항목 인스턴스 제거
-        let updatedItem: EntryItem | null = null;
-        Object.keys(nextEntries).forEach(d => {
-          const item = nextEntries[d].find(i => i.id === id);
-          if (item && !updatedItem) {
-            updatedItem = { ...item, ...updates };
-          }
-          nextEntries[d] = nextEntries[d].filter(i => i.id !== id);
-        });
+        const next = { ...state.entries };
 
+        // 1. 모든 날짜에서 기존 인스턴스 제거
+        let updatedItem: EntryItem | null = null;
+        for (const d of Object.keys(next)) {
+          const item = next[d].find((i) => i.id === id);
+          if (item && !updatedItem) updatedItem = { ...item, ...updates };
+          next[d] = next[d].filter((i) => i.id !== id);
+        }
         if (!updatedItem) return state;
 
-        // 2. 업데이트된 정보를 바탕으로 다시 배치
-        const item = updatedItem as EntryItem;
+        const item = updatedItem;
         if (item.type === 'todo' && item.start_date && item.end_date) {
           try {
-            const days = eachDayOfInterval({ 
-              start: parseISO(item.start_date), 
-              end: parseISO(item.end_date) 
+            const days = eachDayOfInterval({
+              start: parseISO(item.start_date),
+              end: parseISO(item.end_date),
             });
-            days.forEach(day => {
+            for (const day of days) {
               const dStr = format(day, 'yyyy-MM-dd');
-              if (!nextEntries[dStr]) nextEntries[dStr] = [];
-              nextEntries[dStr] = [...nextEntries[dStr], item];
-            });
-          } catch (e) {
-            // 폴백
+              if (!next[dStr]) next[dStr] = [];
+              next[dStr] = [...next[dStr], item];
+            }
+          } catch {
+            // 폴백 — _date에 배치
+            const target = (updates as { date?: string }).date || _date;
+            if (!next[target]) next[target] = [];
+            next[target] = [...next[target], item];
           }
         } else {
-          // 단일 날짜 항목
-          const targetDate = (updates as any).date || _date;
-          if (!nextEntries[targetDate]) nextEntries[targetDate] = [];
-          nextEntries[targetDate] = [...nextEntries[targetDate], item];
+          const target = (updates as { date?: string }).date || _date;
+          if (!next[target]) next[target] = [];
+          next[target] = [...next[target], item];
         }
-
-        return { entries: nextEntries };
+        return { entries: next };
       });
       useUIStore.getState().showToast('성공적으로 수정되었습니다.', 'success');
     } catch (err) {
@@ -223,19 +196,13 @@ export const createBaseSlice: StateCreator<DiaryState, [], [], BaseSlice> = (set
 
   deleteItem: async (_date, id) => {
     try {
-      const { error } = await supabase
-        .from('entries')
-        .delete()
-        .eq('id', id);
-
-      if (error) throw error;
-
+      await getEntryRepository().delete(id);
       set((state) => {
-        const nextEntries = { ...state.entries };
-        Object.keys(nextEntries).forEach(d => {
-          nextEntries[d] = nextEntries[d].filter(item => item.id !== id);
-        });
-        return { entries: nextEntries };
+        const next = { ...state.entries };
+        for (const d of Object.keys(next)) {
+          next[d] = next[d].filter((item) => item.id !== id);
+        }
+        return { entries: next };
       });
       useUIStore.getState().showToast('삭제되었습니다.', 'success');
     } catch (err) {

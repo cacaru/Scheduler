@@ -9,6 +9,7 @@ import { supabase } from '@project/shared/src/utils/supabase';
 import { useAuthStore } from '@project/shared/src/store/authStore';
 import { useDiaryStore } from '@project/shared/src/store/diaryStore';
 import { bootstrapMobilePlatform } from '../platform/bootstrap';
+import { fullSync } from '../sync/sync';
 
 export const unstable_settings = {
   anchor: '(tabs)',
@@ -59,11 +60,16 @@ function RootStackWithAuthGate() {
   const segments = useSegments();
   const router = useRouter();
 
-  // 로그인되면 entries를 한 번 페치 (오프라인 캐시는 Phase 4에서 추가)
+  // 로그인되면:
+  //  1. 즉시 SQLite 캐시에서 읽어 화면 표시 (오프라인이어도 동작)
+  //  2. 백그라운드로 fullSync (원격→로컬) → 끝나면 다시 fetchEntries로 새 데이터 반영
   useEffect(() => {
-    if (session) {
-      fetchEntries();
-    }
+    if (!session) return;
+
+    fetchEntries();
+    fullSync()
+      .then(() => fetchEntries())
+      .catch((err) => console.warn('[layout] initial sync failed:', err));
   }, [session, fetchEntries]);
 
   useEffect(() => {

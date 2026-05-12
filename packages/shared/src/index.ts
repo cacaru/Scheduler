@@ -6,6 +6,9 @@
 export * from './adapters/storage';
 export * from './adapters/theme';
 
+// Repositories
+export * from './repositories';
+
 // Stores
 export * from './store/uiStore';
 export * from './store/authStore';

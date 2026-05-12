@@ -1,6 +1,6 @@
 import { type StateCreator } from 'zustand';
-import { supabase } from '../../utils/supabase';
 import { type DiaryState } from '../diaryStore';
+import { getEntryRepository } from '../../repositories/entryRepository';
 import { getSafeEntries } from './baseSlice';
 
 export interface TodoSlice {
@@ -14,13 +14,10 @@ export const createTodoSlice: StateCreator<DiaryState, [], [], TodoSlice> = (set
     if (!item) return;
 
     const newCompleted = !item.completed;
-    const { error } = await supabase
-      .from('entries')
-      .update({ completed: newCompleted })
-      .eq('id', id);
-
-    if (error) {
-      console.error('Error toggling todo:', error);
+    try {
+      await getEntryRepository().update(id, { completed: newCompleted });
+    } catch (err) {
+      console.error('Error toggling todo:', err);
       return;
     }
 
