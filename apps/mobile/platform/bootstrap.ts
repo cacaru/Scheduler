@@ -53,4 +53,5 @@ export async function bootstrapMobilePlatform(): Promise<void> {
   initNetworkBridge(fullSync);
 
   hydrateUIStore();
+  console.warn('[bootstrap] complete');
 }

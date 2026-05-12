@@ -24,8 +24,14 @@ export function initNetworkBridge(sync: () => Promise<void>): void {
   unsubscribe = NetInfo.addEventListener((state) => {
     const wasOnline = isOnline;
     isOnline = !!state.isConnected && state.isInternetReachable !== false;
+    console.warn('[net] state', {
+      wasOnline,
+      isOnline,
+      isConnected: state.isConnected,
+      isInternetReachable: state.isInternetReachable,
+    });
     if (!wasOnline && isOnline && syncFn) {
-      console.log('[net] reconnected, triggering sync');
+      console.warn('[net] reconnected, triggering sync');
       syncFn().catch((err) => console.error('[net] reconnect sync failed:', err));
     }
   });

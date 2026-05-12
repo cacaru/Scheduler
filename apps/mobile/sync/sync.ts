@@ -98,14 +98,16 @@ export async function pullRemote(): Promise<{ pulled: number }> {
 }
 
 export async function fullSync(): Promise<void> {
-  if (syncing) return;
+  if (syncing) {
+    console.warn('[sync] already running, skipping');
+    return;
+  }
   syncing = true;
+  console.warn('[sync] start');
   try {
     const pushResult = await flushOplog();
     const pullResult = await pullRemote();
-    if (pushResult.pushed > 0 || pullResult.pulled > 0) {
-      console.log('[sync] done', { ...pushResult, ...pullResult });
-    }
+    console.warn('[sync] done', { ...pushResult, ...pullResult });
   } catch (err) {
     console.error('[sync] failed:', err);
   } finally {
