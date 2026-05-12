@@ -7,6 +7,7 @@ import '../global.css';
 
 import { supabase } from '@project/shared/src/utils/supabase';
 import { useAuthStore } from '@project/shared/src/store/authStore';
+import { useDiaryStore } from '@project/shared/src/store/diaryStore';
 import { bootstrapMobilePlatform } from '../platform/bootstrap';
 
 export const unstable_settings = {
@@ -34,7 +35,7 @@ export default function RootLayout() {
       })
       .catch((err) => {
         console.error('[bootstrap] failed:', err);
-        setReady(true); // 에러 화면을 보여주기 위해 일단 진입
+        setReady(true);
       });
 
     return () => unsub?.();
@@ -54,8 +55,16 @@ export default function RootLayout() {
 function RootStackWithAuthGate() {
   const session = useAuthStore((s) => s.session);
   const isLoading = useAuthStore((s) => s.isLoading);
+  const fetchEntries = useDiaryStore((s) => s.fetchEntries);
   const segments = useSegments();
   const router = useRouter();
+
+  // 로그인되면 entries를 한 번 페치 (오프라인 캐시는 Phase 4에서 추가)
+  useEffect(() => {
+    if (session) {
+      fetchEntries();
+    }
+  }, [session, fetchEntries]);
 
   useEffect(() => {
     if (isLoading) return;
@@ -72,6 +81,13 @@ function RootStackWithAuthGate() {
       <Stack screenOptions={{ headerShown: false }}>
         <Stack.Screen name="(tabs)" />
         <Stack.Screen name="(auth)" />
+        <Stack.Screen
+          name="day/[date]"
+          options={{
+            presentation: 'card',
+            animation: 'slide_from_right',
+          }}
+        />
       </Stack>
       <StatusBar style="auto" />
     </>
