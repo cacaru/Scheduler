@@ -15,9 +15,9 @@
     "noEmit": true,
     "jsx": "react-jsx",
 
-    /* 공유 파일 경로 추가 */
+    /* 공유 파일 경로 추가 — Vite alias(@project/shared = packages/shared 루트)와 일치 */
     "paths": {
-      "@project/shared/*": ["../../packages/shared/src/*"],
+      "@project/shared/*": ["../../packages/shared/*"],
       "@project/shared": ["../../packages/shared/src/index.ts"]
     },
 

@@ -8,10 +8,20 @@ pnpm-debug.log*
 lerna-debug.log*
 
 node_modules
+dist
 dist-ssr
 *.local
 .env
 .env.*
+
+# Build artifacts / dev outputs
+states.html
+.expo/
+web-build/
+
+# Claude Code worktree metadata + local memory
+.claude/
+memory/
 
 # Editor directories and files
 .vscode/*

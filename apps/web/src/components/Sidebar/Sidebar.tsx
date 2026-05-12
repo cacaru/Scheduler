@@ -7,6 +7,7 @@ import SidebarTodoItem from './SidebarTodoItem';
 import SidebarGroupedList from './SidebarGroupedList';
 import SideDetailModal from './SideDetailModal';
 import { useSidebarUI } from '@project/shared/src/hooks/useSidebarUI';
+import { useSidebarResize } from '../../hooks/useSidebarResize';
 import { useSidebarDiary } from '@project/shared/src/hooks/useSidebarDiary';
 import { useSidebarAnniversary } from '@project/shared/src/hooks/useSidebarAnniversary';
 import { useUIStore } from '@project/shared/src/store/uiStore';
@@ -29,15 +30,14 @@ const Sidebar: React.FC<SidebarProps> = ({
   currentView,
   onViewChange
 }) => {
-  const { 
-    expandedPanel, 
-    extensionWidth, 
-    isResizing,
+  const {
+    expandedPanel,
     expandedTodoMonths,
     expandedDiaryMonths,
     expandedAnniMonths,
-    actions 
+    actions
   } = useSidebarUI();
+  const { extensionWidth, isResizing, startResizing } = useSidebarResize();
 
   const todoData = useSidebarTodo();
   const diaryData = useSidebarDiary();
@@ -203,7 +203,7 @@ const Sidebar: React.FC<SidebarProps> = ({
           isVisible={expandedPanel === 'todo'}
           width={extensionWidth}
           isResizing={isResizing}
-          onResizerMouseDown={actions.startResizing}
+          onResizerMouseDown={startResizing}
           groupedData={todoData.groupedTodos}
           sortedMonths={todoData.sortedMonths}
           expandedMonths={expandedTodoMonths}
@@ -234,7 +234,7 @@ const Sidebar: React.FC<SidebarProps> = ({
           isVisible={expandedPanel === 'diary'}
           width={extensionWidth}
           isResizing={isResizing}
-          onResizerMouseDown={actions.startResizing}
+          onResizerMouseDown={startResizing}
           groupedData={diaryData.groupedDiaries}
           sortedMonths={diaryData.sortedMonths}
           expandedMonths={expandedDiaryMonths}
@@ -265,7 +265,7 @@ const Sidebar: React.FC<SidebarProps> = ({
           isVisible={expandedPanel === 'anniversary'}
           width={extensionWidth}
           isResizing={isResizing}
-          onResizerMouseDown={actions.startResizing}
+          onResizerMouseDown={startResizing}
           groupedData={anniData.groupedAnniversaries}
           sortedMonths={anniData.sortedMonths}
           expandedMonths={expandedAnniMonths}
