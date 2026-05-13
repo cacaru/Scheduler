@@ -24,6 +24,11 @@ interface EmbedMarker {
   title: string;
   color?: string;
   date: string;
+  // 모바일 카드 모달용 추가 필드
+  entryType?: 'diary' | 'todo' | 'anniversary';
+  content?: string;
+  completed?: boolean;
+  locationName?: string;
 }
 
 interface MarkerMessage {
@@ -128,7 +133,19 @@ const MapEmbed: React.FC = () => {
           <MapMarker
             key={m.id}
             position={{ lat: m.lat, lng: m.lng }}
-            onClick={() => notifyRN({ type: 'markerTap', id: m.id, date: m.date })}
+            onClick={() =>
+              notifyRN({
+                type: 'markerTap',
+                id: m.id,
+                date: m.date,
+                title: m.title,
+                color: m.color,
+                entryType: m.entryType,
+                content: m.content,
+                completed: m.completed,
+                locationName: m.locationName,
+              })
+            }
           />
         ))}
       </Map>

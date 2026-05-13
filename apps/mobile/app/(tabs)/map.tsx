@@ -1,12 +1,14 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { ActivityIndicator, Pressable, Text, View } from 'react-native';
+import { ActivityIndicator, Modal, Pressable, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { WebView, type WebViewMessageEvent } from 'react-native-webview';
+import { Ionicons } from '@expo/vector-icons';
 import Constants from 'expo-constants';
 import * as Location from 'expo-location';
 import { useRouter } from 'expo-router';
 
-import { useDiaryStore } from '@project/shared/src/store/diaryStore';
+import { useDiaryStore, type EntryType } from '@project/shared/src/store/diaryStore';
+import { formatDateWithDay } from '@project/shared/src/utils/dateUtils';
 
 interface EmbedMarker {
   id: string;
@@ -15,15 +17,42 @@ interface EmbedMarker {
   title: string;
   color?: string;
   date: string;
+  entryType: EntryType;
+  content?: string;
+  completed?: boolean;
+  locationName?: string;
 }
 
-type IncomingFromWeb = { type: 'ready' } | { type: 'markerTap'; id: string; date: string };
+interface MarkerTapPayload {
+  type: 'markerTap';
+  id: string;
+  date: string;
+  title: string;
+  color?: string;
+  entryType?: EntryType;
+  content?: string;
+  completed?: boolean;
+  locationName?: string;
+}
+
+type IncomingFromWeb = { type: 'ready' } | MarkerTapPayload;
+
+const TYPE_ICON: Record<EntryType, keyof typeof Ionicons.glyphMap> = {
+  diary: 'create',
+  todo: 'checkbox',
+  anniversary: 'gift',
+};
+
+const TYPE_LABEL: Record<EntryType, string> = {
+  diary: '일기',
+  todo: '할 일',
+  anniversary: '기념일',
+};
 
 /** RN → Web. Web 측에서 window.handleRNMessage(jsonString)을 노출해 둠. */
 function sendToWeb(ref: React.RefObject<WebView | null>, payload: object): void {
   if (!ref.current) return;
   const json = JSON.stringify(payload);
-  // injectJavaScript는 string concat이라 escape 처리 필요 → JSON.stringify를 한 번 더
   const js = `if (window.handleRNMessage) { window.handleRNMessage(${JSON.stringify(json)}); } true;`;
   ref.current.injectJavaScript(js);
 }
@@ -33,9 +62,9 @@ export default function MapScreen() {
   const webRef = useRef<WebView>(null);
   const entries = useDiaryStore((s) => s.entries);
   const [webReady, setWebReady] = useState(false);
+  const [selected, setSelected] = useState<MarkerTapPayload | null>(null);
 
   const rawEmbedUrl = Constants.expoConfig?.extra?.kakaoMapEmbedUrl as string | undefined;
-  // 사용자가 base URL만 넣어도 동작하도록 ?embed=1을 강제로 보장
   const embedUrl = useMemo(() => {
     if (!rawEmbedUrl) return undefined;
     try {
@@ -43,11 +72,11 @@ export default function MapScreen() {
       u.searchParams.set('embed', '1');
       return u.toString();
     } catch {
-      return rawEmbedUrl; // 파싱 실패해도 그대로 시도
+      return rawEmbedUrl;
     }
   }, [rawEmbedUrl]);
 
-  // entries에서 location 있는 항목만 마커로 변환 (반복 펼침된 동일 id 중복 제거)
+  // location이 있는 항목 → 마커
   const markers = useMemo<EmbedMarker[]>(() => {
     const seen = new Set<string>();
     const result: EmbedMarker[] = [];
@@ -62,20 +91,20 @@ export default function MapScreen() {
           title: item.title,
           color: item.color,
           date,
+          entryType: item.type,
+          content: item.content,
+          completed: item.completed,
+          locationName: item.location.name,
         });
       }
     }
     return result;
   }, [entries]);
 
-  // 웹이 ready 알리거나 markers가 갱신되면 다시 push
   useEffect(() => {
-    if (webReady) {
-      sendToWeb(webRef, { type: 'setMarkers', markers });
-    }
+    if (webReady) sendToWeb(webRef, { type: 'setMarkers', markers });
   }, [webReady, markers]);
 
-  // 첫 진입 시 사용자 위치를 받아 setCenter (실패해도 무해 — 웹은 마커 첫 지점/서울로 폴백)
   useEffect(() => {
     if (!webReady) return;
     (async () => {
@@ -94,21 +123,25 @@ export default function MapScreen() {
     })();
   }, [webReady]);
 
-  const handleMessage = useCallback(
-    (e: WebViewMessageEvent) => {
-      try {
-        const data = JSON.parse(e.nativeEvent.data) as IncomingFromWeb;
-        if (data.type === 'ready') {
-          setWebReady(true);
-        } else if (data.type === 'markerTap') {
-          router.push(`/day/${data.date}` as never);
-        }
-      } catch (err) {
-        console.warn('[map] webview message parse failed:', err);
+  const handleMessage = useCallback((e: WebViewMessageEvent) => {
+    try {
+      const data = JSON.parse(e.nativeEvent.data) as IncomingFromWeb;
+      if (data.type === 'ready') {
+        setWebReady(true);
+      } else if (data.type === 'markerTap') {
+        setSelected(data);
       }
-    },
-    [router]
-  );
+    } catch (err) {
+      console.warn('[map] webview message parse failed:', err);
+    }
+  }, []);
+
+  const goToDay = () => {
+    if (!selected) return;
+    const date = selected.date;
+    setSelected(null);
+    router.push(`/day/${date}` as never);
+  };
 
   if (!embedUrl) {
     return (
@@ -143,10 +176,8 @@ export default function MapScreen() {
             <ActivityIndicator />
           </View>
         )}
-        // iOS는 기본 활성화, Android는 명시 필요
         domStorageEnabled
         javaScriptEnabled
-        // 웹 콘텐츠 안의 외부 링크는 새 창 대신 그냥 무시 (지도만 띄움)
         setSupportMultipleWindows={false}
       />
 
@@ -158,6 +189,106 @@ export default function MapScreen() {
           <Text className="text-sm">재시도</Text>
         </Pressable>
       )}
+
+      <MarkerCardModal
+        marker={selected}
+        onClose={() => setSelected(null)}
+        onGoToDay={goToDay}
+      />
     </SafeAreaView>
+  );
+}
+
+interface MarkerCardModalProps {
+  marker: MarkerTapPayload | null;
+  onClose: () => void;
+  onGoToDay: () => void;
+}
+
+function MarkerCardModal({ marker, onClose, onGoToDay }: MarkerCardModalProps) {
+  const visible = !!marker;
+  const type = marker?.entryType ?? 'diary';
+  const color = marker?.color || '#ac9ec4';
+
+  return (
+    <Modal visible={visible} transparent animationType="slide" onRequestClose={onClose}>
+      {/* 배경: 탭하면 닫힘 */}
+      <Pressable
+        className="flex-1 justify-end"
+        style={{ backgroundColor: 'rgba(0,0,0,0.3)' }}
+        onPress={onClose}
+      >
+        {/* 카드 본체: 탭이 배경으로 전파되지 않게 자체 Pressable로 흡수 */}
+        <Pressable
+          onPress={() => {}}
+          className="mx-4 mb-8 bg-white rounded-2xl p-5 shadow-lg"
+          style={{
+            borderLeftWidth: 4,
+            borderLeftColor: color,
+          }}
+        >
+          {/* 헤더: 타입 아이콘 + 날짜 + 닫기 */}
+          <View className="flex-row items-center justify-between mb-3">
+            <View className="flex-row items-center">
+              <Ionicons name={TYPE_ICON[type]} size={16} color="#888" />
+              <Text className="ml-2 text-xs text-gray-500">{TYPE_LABEL[type]}</Text>
+              <Text className="ml-3 text-xs text-gray-500">
+                {marker?.date ? formatDateWithDay(marker.date) : ''}
+              </Text>
+            </View>
+            <Pressable onPress={onClose} hitSlop={8} className="active:opacity-50">
+              <Ionicons name="close" size={20} color="#888" />
+            </Pressable>
+          </View>
+
+          {/* 제목 (todo 완료 시 strikethrough) */}
+          <View className="flex-row items-center mb-2">
+            {type === 'todo' && (
+              <Ionicons
+                name={marker?.completed ? 'checkmark-circle' : 'ellipse-outline'}
+                size={18}
+                color={marker?.completed ? '#22c55e' : '#bbb'}
+                style={{ marginRight: 6 }}
+              />
+            )}
+            <Text
+              className="text-lg font-semibold flex-1"
+              style={{
+                textDecorationLine: marker?.completed ? 'line-through' : 'none',
+                color: marker?.completed ? '#888' : '#222',
+              }}
+            >
+              {marker?.title}
+            </Text>
+          </View>
+
+          {/* 본문 (있을 때만, 최대 2줄) */}
+          {marker?.content ? (
+            <Text className="text-sm text-gray-600 mb-3" numberOfLines={2}>
+              {marker.content}
+            </Text>
+          ) : null}
+
+          {/* 위치명 */}
+          {marker?.locationName ? (
+            <View className="flex-row items-center mb-4">
+              <Ionicons name="location" size={14} color="#888" />
+              <Text className="ml-1 text-xs text-gray-500" numberOfLines={1}>
+                {marker.locationName}
+              </Text>
+            </View>
+          ) : null}
+
+          {/* 이동 버튼 */}
+          <Pressable
+            onPress={onGoToDay}
+            className="rounded-lg py-3 items-center active:opacity-70"
+            style={{ backgroundColor: color }}
+          >
+            <Text className="text-white font-semibold text-sm">이 날짜로 이동</Text>
+          </Pressable>
+        </Pressable>
+      </Pressable>
+    </Modal>
   );
 }
