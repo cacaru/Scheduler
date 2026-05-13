@@ -62,5 +62,8 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
     supabaseUrl: process.env.EXPO_PUBLIC_SUPABASE_URL,
     supabaseAnonKey: process.env.EXPO_PUBLIC_SUPABASE_PUBLISHABLE_KEY,
     kakaoMapEmbedUrl: process.env.EXPO_PUBLIC_KAKAO_MAP_EMBED_URL,
+    eas: {
+      projectId: 'd8083fe4-7f7c-429b-9d61-17c62a3c2727',
+    },
   },
 });
