@@ -10,11 +10,13 @@ import {
   View,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { Ionicons } from '@expo/vector-icons';
 
 import type { EntryItem, EntryType } from '@project/shared/src/store/diaryStore';
 import { PRESET_COLORS } from '@project/shared/src/constants/colors';
 import { ICONS } from '@project/shared/src/constants/anniversary';
 import { useUIStore } from '@project/shared/src/store/uiStore';
+import LocationPickerModal from './LocationPickerModal';
 
 export type EntryDraft = {
   type: EntryType;
@@ -23,6 +25,7 @@ export type EntryDraft = {
   color: string;
   icon?: string;
   is_recurring?: boolean;
+  location?: EntryItem['location'];
 };
 
 export function emptyDraft(type: EntryType): EntryDraft {
@@ -44,6 +47,7 @@ export function draftFromEntry(item: EntryItem): EntryDraft {
     color: item.color || PRESET_COLORS[6],
     icon: item.icon,
     is_recurring: item.is_recurring,
+    location: item.location,
   };
 }
 
@@ -74,8 +78,9 @@ export default function EntryForm({
 }: Props) {
   const accent = useUIStore((s) => s.theme_heavy);
   const [local, setLocal] = useState<EntryDraft | null>(draft);
+  const [pickerOpen, setPickerOpen] = useState(false);
 
-  // 부모가 새 draft를 내려보내면 (다른 항목 편집 / 새로 추가) 로컬 상태를 동기화
+  // 부모가 새 draft를 내려보내면 로컬 상태를 동기화
   useEffect(() => {
     if (draft) setLocal(draft);
   }, [draft]);
@@ -85,6 +90,12 @@ export default function EntryForm({
   const update = (patch: Partial<EntryDraft>) => {
     setLocal((prev) => (prev ? { ...prev, ...patch } : prev));
   };
+
+  const locationLabel = local.location
+    ? local.location.name ||
+      local.location.address ||
+      `${local.location.lat.toFixed(4)}, ${local.location.lng.toFixed(4)}`
+    : null;
 
   return (
     <Modal visible={visible} animationType="slide" onRequestClose={onClose}>
@@ -157,6 +168,29 @@ export default function EntryForm({
             ))}
           </View>
 
+          {/* 위치 */}
+          <Text className="text-xs text-gray-500 mb-2">위치</Text>
+          {locationLabel ? (
+            <View className="flex-row items-center mb-2 p-3 rounded-lg bg-gray-50">
+              <Ionicons name="location" size={16} color="#666" />
+              <Text className="flex-1 ml-2 text-sm text-gray-800" numberOfLines={1}>
+                {locationLabel}
+              </Text>
+              <Pressable onPress={() => update({ location: undefined })} hitSlop={8}>
+                <Ionicons name="close-circle" size={18} color="#aaa" />
+              </Pressable>
+            </View>
+          ) : null}
+          <Pressable
+            onPress={() => setPickerOpen(true)}
+            className="flex-row items-center justify-center mb-4 p-3 rounded-lg bg-gray-100 active:opacity-70"
+          >
+            <Ionicons name="location-outline" size={16} color="#444" />
+            <Text className="ml-2 text-sm text-gray-700">
+              {local.location ? '위치 변경' : '위치 선택'}
+            </Text>
+          </Pressable>
+
           {local.type === 'anniversary' && (
             <>
               <Text className="text-xs text-gray-500 mb-2">아이콘</Text>
@@ -189,6 +223,13 @@ export default function EntryForm({
             </>
           )}
         </ScrollView>
+
+        <LocationPickerModal
+          visible={pickerOpen}
+          initial={local.location}
+          onSelect={(loc) => update({ location: loc })}
+          onClose={() => setPickerOpen(false)}
+        />
       </SafeAreaView>
     </Modal>
   );
