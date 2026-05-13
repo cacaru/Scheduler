@@ -3,6 +3,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { useAuthStore } from '@project/shared/src/store/authStore';
 import { useUIStore } from '@project/shared/src/store/uiStore';
+import { useSidebarUI } from '@project/shared/src/hooks/useSidebarUI';
 import { THEME_COLORS } from '@project/shared/src/constants/colors';
 
 export default function SettingsScreen() {
@@ -12,7 +13,10 @@ export default function SettingsScreen() {
   const theme = useUIStore((s) => s.theme);
   const themePrimary = useUIStore((s) => s.theme_primary);
   const toggleTheme = useUIStore((s) => s.toggleTheme);
-  const setThemeColors = useUIStore((s) => s.setThemeColors);
+
+  // 색상 변경은 useSidebarUI를 거쳐 로컬 스토어 + Supabase profiles 둘 다 갱신
+  // (오프라인일 때 supabase 실패는 silent — 로컬은 항상 반영됨)
+  const { actions: { changeTheme } } = useSidebarUI();
 
   return (
     <SafeAreaView className="flex-1 bg-white" edges={['top']}>
@@ -38,7 +42,7 @@ export default function SettingsScreen() {
               return (
                 <Pressable
                   key={name}
-                  onPress={() => setThemeColors(primary, light, heavy)}
+                  onPress={() => changeTheme(primary, light, heavy)}
                   style={{
                     width: 56,
                     height: 56,

@@ -14,6 +14,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import type { EntryItem, EntryType } from '@project/shared/src/store/diaryStore';
 import { PRESET_COLORS } from '@project/shared/src/constants/colors';
 import { ICONS } from '@project/shared/src/constants/anniversary';
+import { useUIStore } from '@project/shared/src/store/uiStore';
 
 export type EntryDraft = {
   type: EntryType;
@@ -71,6 +72,7 @@ export default function EntryForm({
   onClose,
   onSave,
 }: Props) {
+  const accent = useUIStore((s) => s.theme_heavy);
   const [local, setLocal] = useState<EntryDraft | null>(draft);
 
   // 부모가 새 draft를 내려보내면 (다른 항목 편집 / 새로 추가) 로컬 상태를 동기화
@@ -104,9 +106,8 @@ export default function EntryForm({
               <ActivityIndicator />
             ) : (
               <Text
-                className={
-                  local.title.trim() ? 'text-accent-heavy font-semibold text-base' : 'text-gray-400 text-base'
-                }
+                style={{ color: local.title.trim() ? accent || '#ac9ec4' : '#9ca3af' }}
+                className="font-semibold text-base"
               >
                 저장
               </Text>

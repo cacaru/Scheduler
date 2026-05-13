@@ -95,7 +95,8 @@ export default function CalendarScreen() {
 
       <Pressable
         onPress={() => router.push(`/day/${format(new Date(), 'yyyy-MM-dd')}` as any)}
-        className="absolute bottom-6 right-6 bg-accent-heavy rounded-full w-14 h-14 items-center justify-center shadow-lg active:opacity-70"
+        style={{ backgroundColor: accent || ACCENT_FALLBACK }}
+        className="absolute bottom-6 right-6 rounded-full w-14 h-14 items-center justify-center shadow-lg active:opacity-70"
       >
         <Text className="text-white text-3xl leading-9">+</Text>
       </Pressable>

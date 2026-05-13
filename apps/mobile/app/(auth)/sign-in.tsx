@@ -2,10 +2,12 @@ import { useState } from 'react';
 import { ActivityIndicator, Pressable, Text, TextInput, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { supabase } from '@project/shared/src/utils/supabase';
+import { useUIStore } from '@project/shared/src/store/uiStore';
 
 type Mode = 'sign-in' | 'sign-up';
 
 export default function SignInScreen() {
+  const accent = useUIStore((s) => s.theme_heavy);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [mode, setMode] = useState<Mode>('sign-in');
@@ -54,7 +56,8 @@ export default function SignInScreen() {
         <Pressable
           onPress={onSubmit}
           disabled={loading}
-          className="w-full bg-accent-heavy rounded-lg py-3 items-center mb-4 active:opacity-70"
+          style={{ backgroundColor: accent || '#ac9ec4' }}
+          className="w-full rounded-lg py-3 items-center mb-4 active:opacity-70"
         >
           {loading ? (
             <ActivityIndicator color="white" />
