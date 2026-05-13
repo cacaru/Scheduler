@@ -183,20 +183,16 @@ export default function EntryForm({
             className="border border-gray-300 rounded-lg px-3 py-3 mb-4 text-base"
           />
 
-          {local.type !== 'anniversary' && (
-            <>
-              <Text className="text-xs text-gray-500 mb-1">내용</Text>
-              <TextInput
-                value={local.content}
-                onChangeText={(v) => update({ content: v })}
-                placeholder="내용 (선택)"
-                multiline
-                numberOfLines={4}
-                className="border border-gray-300 rounded-lg px-3 py-3 mb-4 text-base"
-                style={{ minHeight: 100, textAlignVertical: 'top' }}
-              />
-            </>
-          )}
+          <Text className="text-xs text-gray-500 mb-1">내용</Text>
+            <TextInput
+              value={local.content}
+              onChangeText={(v) => update({ content: v })}
+              placeholder="내용 (선택)"
+              multiline
+              numberOfLines={4}
+              className="border border-gray-300 rounded-lg px-3 py-3 mb-4 text-base"
+              style={{ minHeight: 100, textAlignVertical: 'top' }}
+            />
 
           <Text className="text-xs text-gray-500 mb-2">색상</Text>
           <View className="flex-row flex-wrap mb-4" style={{ gap: 8 }}>

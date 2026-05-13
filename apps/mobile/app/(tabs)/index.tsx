@@ -1,5 +1,5 @@
-import { useMemo } from 'react';
-import { ScrollView, StyleSheet, Text, View } from 'react-native';
+import { useMemo, useState } from 'react';
+import { RefreshControl, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Calendar, LocaleConfig, type DateData } from 'react-native-calendars';
 import { useRouter } from 'expo-router';
@@ -9,6 +9,7 @@ import { useDiaryStore } from '@project/shared/src/store/diaryStore';
 import { useUIStore } from '@project/shared/src/store/uiStore';
 import { getRecurringAnniversariesForDate } from '../../components/EntrySections';
 import TodayPreview from '../../components/TodayPreview';
+import { fullSync } from '../../sync/sync';
 
 LocaleConfig.locales['ko'] = {
   monthNames: ['1월', '2월', '3월', '4월', '5월', '6월', '7월', '8월', '9월', '10월', '11월', '12월'],
@@ -26,7 +27,19 @@ export default function CalendarScreen() {
   const entries = useDiaryStore((s) => s.entries);
   const isLoading = useDiaryStore((s) => s.isLoading);
   const toggleTodo = useDiaryStore((s) => s.toggleTodo);
+  const fetchEntries = useDiaryStore((s) => s.fetchEntries);
   const accent = useUIStore((s) => s.theme_heavy);
+
+  const [refreshing, setRefreshing] = useState(false);
+  const onRefresh = async () => {
+    setRefreshing(true);
+    try {
+      await fullSync();
+      await fetchEntries();
+    } finally {
+      setRefreshing(false);
+    }
+  };
 
   const today = useMemo(() => format(new Date(), 'yyyy-MM-dd'), []);
 
@@ -114,8 +127,19 @@ export default function CalendarScreen() {
         style={styles.calendar}
       />
 
-      {/* 하단: 오늘 위젯 카드 (캘린더는 고정, 이 영역만 스크롤) */}
-      <ScrollView className="flex-1" contentContainerStyle={{ paddingBottom: 12 }}>
+      {/* 하단: 오늘 위젯 카드 (캘린더는 고정, 이 영역만 스크롤 + 당겨서 새로고침) */}
+      <ScrollView
+        className="flex-1"
+        contentContainerStyle={{ paddingBottom: 12 }}
+        refreshControl={
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={onRefresh}
+            tintColor={accent || ACCENT_FALLBACK}
+            colors={[accent || ACCENT_FALLBACK]}
+          />
+        }
+      >
         <TodayPreview
           date={today}
           items={todayCombined}

@@ -1,13 +1,15 @@
 import { useMemo, useState } from 'react';
-import { Alert, Pressable, ScrollView, Text, View } from 'react-native';
+import { Alert, Pressable, RefreshControl, ScrollView, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 
 import { useDiaryStore, type EntryItem, type EntryType } from '@project/shared/src/store/diaryStore';
+import { useUIStore } from '@project/shared/src/store/uiStore';
 import { formatDateWithDay } from '@project/shared/src/utils/dateUtils';
 import EntryForm, { type EntryDraft, emptyDraft, draftFromEntry } from '../../components/EntryForm';
 import { Section, getRecurringAnniversariesForDate } from '../../components/EntrySections';
+import { fullSync } from '../../sync/sync';
 
 type FormState =
   | { mode: 'add'; draft: EntryDraft }
@@ -24,9 +26,22 @@ export default function DayScreen() {
   const updateItem = useDiaryStore((s) => s.updateItem);
   const deleteItem = useDiaryStore((s) => s.deleteItem);
   const toggleTodo = useDiaryStore((s) => s.toggleTodo);
+  const fetchEntries = useDiaryStore((s) => s.fetchEntries);
+  const accent = useUIStore((s) => s.theme_heavy);
 
   const [form, setForm] = useState<FormState>(null);
   const [saving, setSaving] = useState(false);
+  const [refreshing, setRefreshing] = useState(false);
+
+  const onRefresh = async () => {
+    setRefreshing(true);
+    try {
+      await fullSync();
+      await fetchEntries();
+    } finally {
+      setRefreshing(false);
+    }
+  };
 
   const dayItems = allEntries[safeDate] || [];
   const recurringAnnis = useMemo(
@@ -109,7 +124,18 @@ export default function DayScreen() {
         <View style={{ width: 32 }} />
       </View>
 
-      <ScrollView className="flex-1" contentContainerStyle={{ paddingBottom: 32 }}>
+      <ScrollView
+        className="flex-1"
+        contentContainerStyle={{ paddingBottom: 32 }}
+        refreshControl={
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={onRefresh}
+            tintColor={accent || '#ac9ec4'}
+            colors={[accent || '#ac9ec4']}
+          />
+        }
+      >
         <Section
           type="anniversary"
           items={anniversaries}
