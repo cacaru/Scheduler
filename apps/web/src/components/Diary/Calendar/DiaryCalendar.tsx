@@ -32,6 +32,68 @@ import clsx from 'clsx';
  * 드래그 앤 드롭을 통한 항목 이동, 스와이프를 통한 월 전환, 날짜별 모달 오픈을 처리합니다.
  */
 
+/**
+ * 글로벌 track 할당
+ * - 같은 항목이 일자마다 같은 row(track)에 그려지도록 그리디 배치한다.
+ * - 정렬 우선순위: 시작일 ↑ → 길이(다중일) ↓ → id (안정)
+ * - 결과: 셀 안 항목 순서가 다른 셀과 정합 → 범위 todo가 가로 한 줄로 안정.
+ */
+const MAX_TRACKS = 4;
+type TrackMap = Map<string, (string | null)[]>;
+
+function allocateTracks(entries: Record<string, EntryItem[]>): {
+  tracks: TrackMap;
+  itemMap: Map<string, EntryItem>;
+} {
+  const itemMap = new Map<string, EntryItem>();
+  const itemDates = new Map<string, string[]>();
+
+  for (const [date, items] of Object.entries(entries)) {
+    for (const item of items) {
+      if (item.type === 'anniversary') continue; // 기념일은 별도 배지로 그려짐
+      if (!itemMap.has(item.id)) itemMap.set(item.id, item);
+      let arr = itemDates.get(item.id);
+      if (!arr) {
+        arr = [];
+        itemDates.set(item.id, arr);
+      }
+      arr.push(date);
+    }
+  }
+  for (const dates of itemDates.values()) dates.sort();
+
+  const sortedIds = Array.from(itemDates.keys()).sort((a, b) => {
+    const ad = itemDates.get(a)!;
+    const bd = itemDates.get(b)!;
+    if (ad[0] !== bd[0]) return ad[0].localeCompare(bd[0]);
+    if (ad.length !== bd.length) return bd.length - ad.length;
+    return a.localeCompare(b);
+  });
+
+  const tracks: TrackMap = new Map();
+  for (const id of sortedIds) {
+    const dates = itemDates.get(id)!;
+    let t = 0;
+    while (true) {
+      const free = dates.every((d) => {
+        const dt = tracks.get(d);
+        return !dt || !dt[t];
+      });
+      if (free) break;
+      t++;
+    }
+    for (const d of dates) {
+      let dt = tracks.get(d);
+      if (!dt) {
+        dt = [];
+        tracks.set(d, dt);
+      }
+      dt[t] = id;
+    }
+  }
+  return { tracks, itemMap };
+}
+
 // 드래그 가능한 항목
 const DraggableEntry = React.memo<{activate: boolean, item: EntryItem; date: string }>(({activate, item, date }) => {
   const { attributes, listeners, setNodeRef, isDragging } = useDraggable({
@@ -112,17 +174,19 @@ const DroppableDay = React.memo<{
   isToday: boolean;
   items: EntryItem[];
   allEntries: Record<string, EntryItem[]>;
+  dayTracks: (string | null)[];
+  itemMap: Map<string, EntryItem>;
   onClick: (day: Date) => void;
-}>(({ day, isCurrentMonth, isToday, items, allEntries, onClick }) => {
+}>(({ day, isCurrentMonth, isToday, items, allEntries, dayTracks, itemMap, onClick }) => {
   const formattedDate = useMemo(() => format(day, 'yyyy-MM-dd'), [day]);
   const dayNumber = useMemo(() => format(day, 'd'), [day]);
-  
-  // 기념일 필터링
+
+  // 기념일 필터링 (트랙과 무관 — 기념일은 별도 배지로 그려짐)
   const anniversaries = useMemo(() => {
     const dailyAnnis = items.filter(item => item.type === 'anniversary');
     const currentMonthDay = format(day, 'MM-dd');
     const recurringAnnis: EntryItem[] = [];
-    
+
     Object.keys(allEntries).forEach(dateStr => {
       if (dateStr === formattedDate) return;
       if (dateStr.endsWith(currentMonthDay)) {
@@ -130,34 +194,15 @@ const DroppableDay = React.memo<{
         recurringAnnis.push(...annis);
       }
     });
-    
+
     return [...dailyAnnis, ...recurringAnnis];
   }, [items, allEntries, day, formattedDate]);
 
-  // 일기/할 일 정렬 (시작일이 빠를수록 우선, 그 다음 기간형 우선)
-  const nonAnniversaryItems = useMemo(() => {
-    return items
-      .filter(item => item.type !== 'anniversary')
-      .sort((a, b) => {
-        // 1. 시작일 기준 정렬 (오래된 순)
-        const aStart = a.start_date || '9999-99-99';
-        const bStart = b.start_date || '9999-99-99';
-        
-        if (aStart !== bStart) {
-          return aStart.localeCompare(bStart);
-        }
-
-        // 2. 시작일이 같으면 기간형을 우선
-        const aIsRange = a.type === 'todo' && a.start_date && a.end_date && a.start_date !== a.end_date;
-        const bIsRange = b.type === 'todo' && b.start_date && b.end_date && b.start_date !== b.end_date;
-        
-        if (aIsRange && !bIsRange) return -1;
-        if (!aIsRange && bIsRange) return 1;
-        
-        // 3. 나머지는 ID로 고정 순서 유지
-        return a.id.localeCompare(b.id);
-      });
-  }, [items]);
+  // MAX_TRACKS를 초과해 잘려나가는 항목 수 (옅은 +N 표시용)
+  const hiddenCount = useMemo(
+    () => dayTracks.slice(MAX_TRACKS).filter(Boolean).length,
+    [dayTracks]
+  );
 
   const { isOver, setNodeRef } = useDroppable({
     id: `droppable-${formattedDate}`,
@@ -201,11 +246,34 @@ const DroppableDay = React.memo<{
       </div>
 
       <div className={styles.entryListSummary}>
-        {nonAnniversaryItems.slice(0, 4).map((item) => (
-          <DraggableEntry activate={item.start_date === item.end_date} key={item.id} item={item} date={formattedDate} />
-          
-        ))}
-        {nonAnniversaryItems.length > 4 && <div className={clsx(styles.summaryItem, styles.moreIndicator)}>+{nonAnniversaryItems.length - 4}개 더보기</div>}
+        {Array.from({ length: MAX_TRACKS }, (_, idx) => {
+          const itemId = dayTracks[idx];
+          const item = itemId ? itemMap.get(itemId) : undefined;
+          if (!item) {
+            // 빈 track은 placeholder로 자리만 차지 → 같은 항목이 일자마다 같은 row 유지
+            return (
+              <div
+                key={`ph-${idx}`}
+                className={styles.summaryItem}
+                style={{ visibility: 'hidden', pointerEvents: 'none' }}
+                aria-hidden
+              >
+                {' '}
+              </div>
+            );
+          }
+          return (
+            <DraggableEntry
+              activate={item.start_date === item.end_date}
+              key={item.id}
+              item={item}
+              date={formattedDate}
+            />
+          );
+        })}
+        {hiddenCount > 0 && (
+          <div className={clsx(styles.summaryItem, styles.moreIndicator)}>+{hiddenCount}개 더보기</div>
+        )}
       </div>
     </div>
   );
@@ -234,6 +302,9 @@ const DiaryCalendar: React.FC = () => {
   
   const entries = useDiaryStore(state => state.entries);
   const moveItem = useDiaryStore(state => state.moveItem);
+
+  // 글로벌 track 할당 — 같은 항목이 일자마다 같은 row에 나오게 함
+  const { tracks, itemMap } = useMemo(() => allocateTracks(entries), [entries]);
 
   const navigationDate = useUIStore(state => state.navigationDate);
   const setModalOpen = useUIStore(state => state.setModalOpen);
@@ -376,17 +447,22 @@ const DiaryCalendar: React.FC = () => {
             {['일', '월', '화', '수', '목', '금', '토'].map(d => <div className={styles.calendarDayName} key={d}>{d}</div>)}
           </div>
           <div className={clsx(styles.calendarContent, animationClass)}>
-            {calendarDays.map((day) => (
-              <DroppableDay
-                key={format(day, 'yyyy-MM-dd')}
-                day={day}
-                isCurrentMonth={isSameMonth(day, monthStart)}
-                isToday={isSameDay(day, new Date())}
-                items={entries[format(day, 'yyyy-MM-dd')] || []}
-                allEntries={entries}
-                onClick={onDateClick}
-              />
-            ))}
+            {calendarDays.map((day) => {
+              const dateStr = format(day, 'yyyy-MM-dd');
+              return (
+                <DroppableDay
+                  key={dateStr}
+                  day={day}
+                  isCurrentMonth={isSameMonth(day, monthStart)}
+                  isToday={isSameDay(day, new Date())}
+                  items={entries[dateStr] || []}
+                  allEntries={entries}
+                  dayTracks={tracks.get(dateStr) || []}
+                  itemMap={itemMap}
+                  onClick={onDateClick}
+                />
+              );
+            })}
           </div>
         </div>
         
