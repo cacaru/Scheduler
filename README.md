@@ -160,31 +160,27 @@ RN ↔ Web 통신:
 
 ## 🛠️ 기술 스택
 
-### 공통 (packages/shared)
-- **TypeScript 5.9 / 6** · **Zustand 5** · **Supabase JS 2** · **date-fns 4**
+### 공통 (`packages/shared`)
+- **언어** — TypeScript
+- **상태 관리** — Zustand
+- **백엔드** — Supabase
+- **유틸** — date-fns
 
-### 웹 (apps/web)
-- **React 19.1** · **Vite 8** · **Rolldown / React Compiler**
-- **react-kakao-maps-sdk** (카카오맵)
-- **@dnd-kit** (드래그 정렬)
-- **lucide-react** (아이콘)
-- **CSS Modules**
-- 배포: **Vercel**
+### 웹 (`apps/web`)
+- **프레임워크** — React 19, Vite 8
+- **스타일링** — CSS Modules
+- **UI** — @dnd-kit, lucide-react
+- **지도** — react-kakao-maps-sdk
+- **배포** — Vercel
 
-### 모바일 (apps/mobile)
-- **React Native 0.81** · **Expo SDK 54** · **expo-router 6** (file-based)
-- **NativeWind 4** (Tailwind RN)
-- **expo-sqlite 16** + **@react-native-async-storage/async-storage**
-- **react-native-webview 13** (카카오맵 임베드)
-- **react-native-calendars** (월간 캘린더)
-- **@react-native-community/netinfo** (오프라인 감지)
-- **@react-native-community/datetimepicker** (기간 선택)
-- **lucide-react-native** + **react-native-svg**
-- 빌드: **EAS Build** (APK / AAB)
-
-### 백엔드
-- **Supabase**: PostgreSQL + Auth + RLS
-- **테이블**: `profiles` (테마 색상), `entries` (type 컬럼으로 일기/할일/기념일 구분, jsonb location)
+### 모바일 (`apps/mobile`)
+- **프레임워크** — React Native 0.81, Expo SDK 54, expo-router
+- **로컬 DB** — expo-sqlite, AsyncStorage
+- **스타일링** — NativeWind
+- **UI** — react-native-calendars, datetimepicker, lucide-react-native
+- **동기화** — NetInfo + 자체 oplog 큐
+- **지도** — react-native-webview, expo-location
+- **빌드** — EAS Build (APK / AAB)
 
 ---
 
