@@ -60,7 +60,7 @@ export default function DayScreen() {
           draft.title,
           draft.content,
           draft.color,
-          undefined,
+          draft.location,
           draft.is_recurring,
           draft.icon
         );
@@ -71,6 +71,7 @@ export default function DayScreen() {
           color: draft.color,
           icon: draft.icon,
           is_recurring: draft.is_recurring,
+          location: draft.location,
         });
       }
       setForm(null);
