@@ -37,6 +37,13 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
     'expo-router',
     'expo-sqlite',
     [
+      'expo-location',
+      {
+        locationWhenInUsePermission:
+          '지도에서 내 위치를 표시하기 위해 위치 정보를 사용합니다.',
+      },
+    ],
+    [
       'expo-splash-screen',
       {
         image: './assets/images/splash-icon.png',
