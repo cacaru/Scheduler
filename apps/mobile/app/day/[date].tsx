@@ -62,7 +62,9 @@ export default function DayScreen() {
           draft.color,
           draft.location,
           draft.is_recurring,
-          draft.icon
+          draft.icon,
+          draft.start_date,
+          draft.end_date
         );
       } else {
         await updateItem(safeDate, form.id, {
@@ -72,6 +74,8 @@ export default function DayScreen() {
           icon: draft.icon,
           is_recurring: draft.is_recurring,
           location: draft.location,
+          start_date: draft.start_date,
+          end_date: draft.end_date,
         });
       }
       setForm(null);
@@ -140,6 +144,7 @@ export default function DayScreen() {
         draft={form?.draft ?? null}
         saving={saving}
         isEdit={form?.mode === 'edit'}
+        entryDate={safeDate}
         dateLabel={formatDateWithDay(safeDate)}
         onClose={() => setForm(null)}
         onSave={onSave}

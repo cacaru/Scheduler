@@ -36,6 +36,7 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
   plugins: [
     'expo-router',
     'expo-sqlite',
+    '@react-native-community/datetimepicker',
     [
       'expo-location',
       {
