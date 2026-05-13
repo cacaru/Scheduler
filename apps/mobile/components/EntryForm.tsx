@@ -17,8 +17,8 @@ import { format, parseISO } from 'date-fns';
 
 import type { EntryItem, EntryType } from '@project/shared/src/store/diaryStore';
 import { PRESET_COLORS } from '@project/shared/src/constants/colors';
-import { ICONS } from '@project/shared/src/constants/anniversary';
 import { useUIStore } from '@project/shared/src/store/uiStore';
+import { ICONS } from '../icons/anniversary';
 import LocationPickerModal from './LocationPickerModal';
 
 export type EntryDraft = {
@@ -296,22 +296,27 @@ export default function EntryForm({
             <>
               <Text className="text-xs text-gray-500 mb-2">아이콘</Text>
               <View className="flex-row flex-wrap mb-4" style={{ gap: 8 }}>
-                {ICONS.map(({ name }) => (
-                  <Pressable
-                    key={name}
-                    onPress={() => update({ icon: name })}
-                    style={{
-                      paddingVertical: 6,
-                      paddingHorizontal: 10,
-                      borderRadius: 8,
-                      backgroundColor: local.icon === name ? local.color : '#f3f4f6',
-                      borderWidth: 1,
-                      borderColor: local.icon === name ? '#333' : '#e5e7eb',
-                    }}
-                  >
-                    <Text className="text-xs">{name}</Text>
-                  </Pressable>
-                ))}
+                {ICONS.map(({ name, icon: Icon }) => {
+                  const selected = local.icon === name;
+                  return (
+                    <Pressable
+                      key={name}
+                      onPress={() => update({ icon: name })}
+                      style={{
+                        width: 40,
+                        height: 40,
+                        borderRadius: 8,
+                        backgroundColor: selected ? local.color : '#f3f4f6',
+                        borderWidth: 1,
+                        borderColor: selected ? '#333' : '#e5e7eb',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                      }}
+                    >
+                      <Icon size={20} color={selected ? '#222' : '#666'} />
+                    </Pressable>
+                  );
+                })}
               </View>
 
               <View className="flex-row items-center justify-between mb-4">

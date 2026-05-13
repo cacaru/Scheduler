@@ -14,7 +14,7 @@ import { useUIStore } from '@project/shared/src/store/uiStore';
 import { type ViewType } from '../../App';
 import { supabase } from '@project/shared/src/utils/supabase';
 import styles from './Sidebar.module.css';
-import { ANNIVERSARY_ICONS } from '@project/shared/src/constants/anniversary';
+import { ANNIVERSARY_ICONS } from '../../icons/anniversary';
 import clsx from 'clsx';
 
 interface SidebarProps {

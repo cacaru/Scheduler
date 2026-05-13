@@ -4,7 +4,7 @@ import { type EntryItem } from '@project/shared/src/store/diaryStore';
 import { type SidebarPanelType } from '@project/shared/src/hooks/useSidebarUI';
 import SidebarGroupedList from './SidebarGroupedList';
 import SidebarTodoItem from './SidebarTodoItem';
-import { ANNIVERSARY_ICONS } from '@project/shared/src/constants/anniversary';
+import { ANNIVERSARY_ICONS } from '../../icons/anniversary';
 
 interface SidebarExtensionProps {
   expandedPanel: SidebarPanelType;

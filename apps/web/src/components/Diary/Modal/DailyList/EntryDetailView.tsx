@@ -3,7 +3,7 @@ import { X as CloseIcon, MapPin, Edit2, Book, Check, Gift } from 'lucide-react';
 import { Map, MapMarker } from 'react-kakao-maps-sdk';
 import { type EntryItem } from '@project/shared/src/store/diaryStore';
 import { Calendar } from 'lucide-react';
-import { ANNIVERSARY_ICONS } from '@project/shared/src/constants/anniversary';
+import { ANNIVERSARY_ICONS } from '../../../../icons/anniversary';
 /**
  * EntryDetailView.tsx
  * 선택된 일기 또는 할 일의 상세 내용을 보여주는 독립 패널입니다.
