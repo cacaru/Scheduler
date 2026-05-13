@@ -297,21 +297,3 @@ eas env:create --environment preview --name EXPO_PUBLIC_KAKAO_MAP_EMBED_URL --va
 eas build --platform android --profile preview     # APK (개인 설치/배포용)
 eas build --platform android --profile production  # AAB (Play Store용, autoIncrement)
 ```
-
----
-
-## 🔮 향후 계획
-
-- 모바일 드래그앤드롭 정렬 (`react-native-draggable-flatlist`)
-- 한국어 폰트 번들링 + 폰트 피커 (`expo-font` + ThemeContext)
-- AuthProvider 추상화 — Supabase ↔ Spring Boot 백엔드 교체 대비
-- 모바일 푸시 알림 (`expo-notifications`)
-- 카메라/갤러리로 일기 사진 첨부 (`expo-image-picker`)
-- OTA 업데이트 (`expo-updates`)
-- Play Store 출시
-
----
-
-## 📄 라이선스
-
-개인 프로젝트. 학습·포트폴리오 목적으로 공개합니다.
