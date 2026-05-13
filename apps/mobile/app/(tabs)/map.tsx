@@ -34,7 +34,18 @@ export default function MapScreen() {
   const entries = useDiaryStore((s) => s.entries);
   const [webReady, setWebReady] = useState(false);
 
-  const embedUrl = Constants.expoConfig?.extra?.kakaoMapEmbedUrl as string | undefined;
+  const rawEmbedUrl = Constants.expoConfig?.extra?.kakaoMapEmbedUrl as string | undefined;
+  // 사용자가 base URL만 넣어도 동작하도록 ?embed=1을 강제로 보장
+  const embedUrl = useMemo(() => {
+    if (!rawEmbedUrl) return undefined;
+    try {
+      const u = new URL(rawEmbedUrl);
+      u.searchParams.set('embed', '1');
+      return u.toString();
+    } catch {
+      return rawEmbedUrl; // 파싱 실패해도 그대로 시도
+    }
+  }, [rawEmbedUrl]);
 
   // entries에서 location 있는 항목만 마커로 변환 (반복 펼침된 동일 id 중복 제거)
   const markers = useMemo<EmbedMarker[]>(() => {
