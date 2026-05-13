@@ -258,7 +258,7 @@ const DroppableDay = React.memo<{
                 style={{ visibility: 'hidden', pointerEvents: 'none' }}
                 aria-hidden
               >
-                {' '}
+                {'\u00A0'}
               </div>
             );
           }
