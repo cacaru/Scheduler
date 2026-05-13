@@ -65,7 +65,7 @@ export default function CalendarScreen() {
 
   return (
     <SafeAreaView className="flex-1 bg-white" edges={['top']}>
-      <View className="px-4 pt-3 pb-2 flex-row items-center justify-between">
+      <View className="px-4 pt-3 pb-2 flex-row items-center justify-center">
         <Text className="text-lg font-semibold">다이어리</Text>
         {isLoading && <Text className="text-xs text-gray-400">불러오는 중…</Text>}
       </View>
@@ -73,6 +73,7 @@ export default function CalendarScreen() {
       <Calendar
         markingType="multi-dot"
         markedDates={markedDates}
+        monthFormat={'yyyy MMMM'}
         onDayPress={onDayPress}
         firstDay={0}
         enableSwipeMonths
@@ -86,12 +87,6 @@ export default function CalendarScreen() {
         }}
         style={styles.calendar}
       />
-
-      <View className="flex-row items-center justify-center gap-4 px-4 pt-2">
-        <LegendDot color="#88b" label="일기" />
-        <LegendDot color="#8b8" label="할 일" />
-        <LegendDot color="#fd0" label="기념일(배경)" />
-      </View>
 
       <Pressable
         onPress={() => router.push(`/day/${format(new Date(), 'yyyy-MM-dd')}` as any)}
