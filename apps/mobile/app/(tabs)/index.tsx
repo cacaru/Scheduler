@@ -1,12 +1,14 @@
 import { useMemo } from 'react';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Calendar, LocaleConfig, type DateData } from 'react-native-calendars';
 import { useRouter } from 'expo-router';
 import { format } from 'date-fns';
 
-import { useDiaryStore } from '@project/shared/src/store/diaryStore';
+import { useDiaryStore, type EntryItem } from '@project/shared/src/store/diaryStore';
 import { useUIStore } from '@project/shared/src/store/uiStore';
+import { formatDateWithDay } from '@project/shared/src/utils/dateUtils';
+import { Section, getRecurringAnniversariesForDate } from '../../components/EntrySections';
 
 LocaleConfig.locales['ko'] = {
   monthNames: ['1월', '2월', '3월', '4월', '5월', '6월', '7월', '8월', '9월', '10월', '11월', '12월'],
@@ -23,45 +25,59 @@ export default function CalendarScreen() {
   const router = useRouter();
   const entries = useDiaryStore((s) => s.entries);
   const isLoading = useDiaryStore((s) => s.isLoading);
+  const toggleTodo = useDiaryStore((s) => s.toggleTodo);
   const accent = useUIStore((s) => s.theme_heavy);
 
-  // markedDates: entries의 날짜별로 멀티 도트 + 기념일 강조
+  const today = useMemo(() => format(new Date(), 'yyyy-MM-dd'), []);
+
+  // 오늘 항목 분류 (반복 기념일 자동 합침)
+  const todayItems = entries[today] || [];
+  const recurringAnnis = useMemo(
+    () => getRecurringAnniversariesForDate(entries, today),
+    [entries, today]
+  );
+  const todayAnniversaries = useMemo(
+    () => [...todayItems.filter((i) => i.type === 'anniversary'), ...recurringAnnis],
+    [todayItems, recurringAnnis]
+  );
+  const todayDiaries = useMemo(() => todayItems.filter((i) => i.type === 'diary'), [todayItems]);
+  const todayTodos = useMemo(() => todayItems.filter((i) => i.type === 'todo'), [todayItems]);
+
+  // 캘린더 마커
   const markedDates = useMemo(() => {
     const result: Record<string, any> = {};
-
     for (const [date, items] of Object.entries(entries)) {
       if (!items || items.length === 0) continue;
-
       const hasAnniversary = items.some((i) => i.type === 'anniversary');
-      const dots = items
-        .slice(0, 4)
-        .map((i, idx) => ({
-          key: `${i.id}-${idx}`,
-          color: i.color || accent || ACCENT_FALLBACK,
-        }));
-
+      const dots = items.slice(0, 4).map((i, idx) => ({
+        key: `${i.id}-${idx}`,
+        color: i.color || accent || ACCENT_FALLBACK,
+      }));
       result[date] = {
         marked: true,
         dots,
         ...(hasAnniversary && { customStyles: { container: { backgroundColor: '#fff7d6' } } }),
       };
     }
-
-    // 오늘 날짜 강조 (다른 마킹과 합쳐짐)
-    const today = format(new Date(), 'yyyy-MM-dd');
     result[today] = {
       ...(result[today] || {}),
       selected: true,
       selectedColor: accent || ACCENT_FALLBACK,
       selectedTextColor: 'white',
     };
-
     return result;
-  }, [entries, accent]);
+  }, [entries, accent, today]);
 
   const onDayPress = (day: DateData) => {
-    router.push(`/day/${day.dateString}` as any);
+    router.push(`/day/${day.dateString}` as never);
   };
+
+  // 섹션 콜백 — 모두 오늘 day 화면으로 이동 (상세 편집은 거기서)
+  const goToToday = () => router.push(`/day/${today}` as never);
+  const onSectionAdd = () => goToToday();
+  const onItemEdit = (_item: EntryItem) => goToToday();
+  // 체크박스 토글은 인라인 (스토어 액션 직접 호출 — 즉시 반영)
+  const onItemToggleTodo = (item: EntryItem) => toggleTodo(today, item.id);
 
   return (
     <SafeAreaView className="flex-1 bg-white" edges={['top']}>
@@ -87,19 +103,43 @@ export default function CalendarScreen() {
         style={styles.calendar}
       />
 
-      <View className="flex-row items-center justify-center gap-4 px-4 pt-2">
+      <View className="flex-row items-center justify-center gap-4 px-4 pt-1 pb-2 border-b border-gray-100">
         <LegendDot color="#88b" label="일기" />
         <LegendDot color="#8b8" label="할 일" />
         <LegendDot color="#fd0" label="기념일(배경)" />
       </View>
 
-      <Pressable
-        onPress={() => router.push(`/day/${format(new Date(), 'yyyy-MM-dd')}` as any)}
-        style={{ backgroundColor: accent || ACCENT_FALLBACK }}
-        className="absolute bottom-6 right-6 rounded-full w-14 h-14 items-center justify-center shadow-lg active:opacity-70"
-      >
-        <Text className="text-white text-3xl leading-9">+</Text>
-      </Pressable>
+      {/* 하단: 오늘 항목 (캘린더는 고정, 이 영역만 스크롤) */}
+      <ScrollView className="flex-1" contentContainerStyle={{ paddingBottom: 24 }}>
+        <View className="px-4 pt-4 pb-1">
+          <Text className="text-base font-semibold text-gray-800">
+            오늘 — {formatDateWithDay(today)}
+          </Text>
+        </View>
+
+        <Section
+          type="anniversary"
+          items={todayAnniversaries}
+          dayDate={today}
+          onAdd={onSectionAdd}
+          onEdit={onItemEdit}
+        />
+        <Section
+          type="diary"
+          items={todayDiaries}
+          dayDate={today}
+          onAdd={onSectionAdd}
+          onEdit={onItemEdit}
+        />
+        <Section
+          type="todo"
+          items={todayTodos}
+          dayDate={today}
+          onAdd={onSectionAdd}
+          onEdit={onItemEdit}
+          onToggleTodo={onItemToggleTodo}
+        />
+      </ScrollView>
     </SafeAreaView>
   );
 }
@@ -115,6 +155,6 @@ function LegendDot({ color, label }: { color: string; label: string }) {
 
 const styles = StyleSheet.create({
   calendar: {
-    paddingBottom: 8,
+    paddingBottom: 4,
   },
 });
