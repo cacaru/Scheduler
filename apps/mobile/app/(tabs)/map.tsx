@@ -9,6 +9,7 @@ import { useRouter } from 'expo-router';
 
 import { useDiaryStore, type EntryType } from '@project/shared/src/store/diaryStore';
 import { formatDateWithDay } from '@project/shared/src/utils/dateUtils';
+import { getAnniversaryIcon } from '../../icons/anniversary';
 
 interface EmbedMarker {
   id: string;
@@ -30,6 +31,7 @@ interface MarkerTapPayload {
   title: string;
   color?: string;
   entryType?: EntryType;
+  icon?: string;
   content?: string;
   completed?: boolean;
   locationName?: string;
@@ -250,6 +252,12 @@ function MarkerCardModal({ marker, onClose, onGoToDay }: MarkerCardModalProps) {
                 color={marker?.completed ? '#22c55e' : '#bbb'}
                 style={{ marginRight: 6 }}
               />
+            )}
+            {type === 'anniversary' && marker?.icon ? (() => {
+                const AnniIcon = getAnniversaryIcon(marker.icon);
+                return <AnniIcon size={16} color={marker.color || '#888'} />;
+              })() : (
+                <Ionicons name={TYPE_ICON[type]} size={16} color="#888" />
             )}
             <Text
               className="text-lg font-semibold flex-1"

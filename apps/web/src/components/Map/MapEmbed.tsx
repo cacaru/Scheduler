@@ -26,6 +26,8 @@ interface EmbedMarker {
   date: string;
   // 모바일 카드 모달용 추가 필드
   entryType?: 'diary' | 'todo' | 'anniversary';
+  // 아이콘 표기용 변수
+  icon?: string;
   content?: string;
   completed?: boolean;
   locationName?: string;
@@ -141,6 +143,7 @@ const MapEmbed: React.FC = () => {
                 title: m.title,
                 color: m.color,
                 entryType: m.entryType,
+                icon: m.icon,
                 content: m.content,
                 completed: m.completed,
                 locationName: m.locationName,

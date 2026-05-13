@@ -5,6 +5,7 @@
 import { Pressable, Text, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import type { EntryItem, EntryType } from '@project/shared/src/store/diaryStore';
+import { getAnniversaryIcon } from '../icons/anniversary';
 
 const SECTION_META: Record<EntryType, { title: string; icon: keyof typeof Ionicons.glyphMap }> = {
   anniversary: { title: '기념일', icon: 'gift' },
@@ -87,6 +88,7 @@ interface ItemRowProps {
 }
 
 export function ItemRow({ item, isRecurringFromOtherDate, onPress, onLongPress, onToggle }: ItemRowProps) {
+  const AnniIcon = item.type === 'anniversary' ? getAnniversaryIcon(item.icon) : null;
   return (
     <Pressable
       onPress={onPress}
@@ -107,6 +109,11 @@ export function ItemRow({ item, isRecurringFromOtherDate, onPress, onLongPress, 
           />
         </Pressable>
       )}
+
+      {AnniIcon &&
+        <AnniIcon size={16} color={item.color || '#888'} style={{marginRight: 8}} />
+      }
+
       <View className="flex-1">
         <Text
           className="text-base"
