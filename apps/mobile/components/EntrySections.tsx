@@ -6,6 +6,7 @@ import { Pressable, Text, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import type { EntryItem, EntryType } from '@project/shared/src/store/diaryStore';
 import { getAnniversaryIcon } from '../icons/anniversary';
+import { Trash2 } from 'lucide-react-native';
 
 const SECTION_META: Record<EntryType, { title: string; icon: keyof typeof Ionicons.glyphMap }> = {
   anniversary: { title: '기념일', icon: 'gift' },
@@ -69,6 +70,7 @@ export function Section({
               !!item.start_date &&
               item.start_date !== dayDate
             }
+            onDelete={onDelete ? () => onDelete(item) : undefined}
             onPress={() => onEdit(item)}
             onLongPress={() => (onDelete ?? onEdit)(item)}
             onToggle={type === 'todo' && onToggleTodo ? () => onToggleTodo(item) : undefined}
@@ -82,12 +84,19 @@ export function Section({
 interface ItemRowProps {
   item: EntryItem;
   isRecurringFromOtherDate: boolean;
+  onDelete?: () => void;
   onPress: () => void;
   onLongPress: () => void;
   onToggle?: () => void;
 }
 
-export function ItemRow({ item, isRecurringFromOtherDate, onPress, onLongPress, onToggle }: ItemRowProps) {
+export function ItemRow({ 
+  item,
+  isRecurringFromOtherDate, 
+  onDelete,
+  onPress, 
+  onLongPress,
+  onToggle }: ItemRowProps) {
   const AnniIcon = item.type === 'anniversary' ? getAnniversaryIcon(item.icon) : null;
   return (
     <Pressable
@@ -131,6 +140,18 @@ export function ItemRow({ item, isRecurringFromOtherDate, onPress, onLongPress, 
           </Text>
         ) : null}
       </View>
+      
+      {/* 삭제 버튼 */}
+      {onDelete && (
+        <Pressable
+          onPress={onDelete}
+          hitSlop={10}
+          className="ml-3 p-1 active:opacity-50"
+        >
+          <Trash2 size={16} color={'#ffb7b2'}/>
+        </Pressable>
+      )}
+      
     </Pressable>
   );
 }

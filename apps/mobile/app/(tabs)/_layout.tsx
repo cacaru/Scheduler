@@ -1,11 +1,14 @@
 import { Tabs } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
+import { useUIStore } from '@project/shared/src/store/uiStore';
 
 export default function TabLayout() {
+  const heavyColor = useUIStore((s) => s.theme_heavy);
+
   return (
     <Tabs
       screenOptions={{
-        tabBarActiveTintColor: '#ac9ec4',
+        tabBarActiveTintColor: heavyColor || '#ac9ec4',
         headerShown: false,
       }}
     >
