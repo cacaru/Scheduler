@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import {
   ActivityIndicator,
   Modal,
+  Platform,
   Pressable,
   ScrollView,
   Switch,
@@ -11,6 +12,8 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
+import DateTimePicker, { type DateTimePickerEvent } from '@react-native-community/datetimepicker';
+import { format, parseISO } from 'date-fns';
 
 import type { EntryItem, EntryType } from '@project/shared/src/store/diaryStore';
 import { PRESET_COLORS } from '@project/shared/src/constants/colors';
@@ -26,6 +29,8 @@ export type EntryDraft = {
   icon?: string;
   is_recurring?: boolean;
   location?: EntryItem['location'];
+  start_date?: string; // "yyyy-MM-dd" — todo의 기간형일 때만
+  end_date?: string;
 };
 
 export function emptyDraft(type: EntryType): EntryDraft {
@@ -33,7 +38,7 @@ export function emptyDraft(type: EntryType): EntryDraft {
     type,
     title: '',
     content: '',
-    color: PRESET_COLORS[6], // soft lavender
+    color: PRESET_COLORS[6],
     icon: type === 'anniversary' ? 'Gift' : undefined,
     is_recurring: type === 'anniversary' ? true : undefined,
   };
@@ -48,6 +53,8 @@ export function draftFromEntry(item: EntryItem): EntryDraft {
     icon: item.icon,
     is_recurring: item.is_recurring,
     location: item.location,
+    start_date: item.start_date,
+    end_date: item.end_date,
   };
 }
 
@@ -56,6 +63,8 @@ interface Props {
   draft: EntryDraft | null;
   saving: boolean;
   isEdit: boolean;
+  /** 항목이 속한 날짜 (yyyy-MM-dd) — 기간 토글 기본값 등에 사용 */
+  entryDate: string;
   dateLabel: string;
   onClose: () => void;
   onSave: (draft: EntryDraft) => Promise<void> | void;
@@ -67,11 +76,21 @@ const TYPE_LABEL: Record<EntryType, string> = {
   anniversary: '기념일',
 };
 
+function safeParse(d: string | undefined, fallback: Date): Date {
+  if (!d) return fallback;
+  try {
+    return parseISO(d);
+  } catch {
+    return fallback;
+  }
+}
+
 export default function EntryForm({
   visible,
   draft,
   saving,
   isEdit,
+  entryDate,
   dateLabel,
   onClose,
   onSave,
@@ -79,8 +98,9 @@ export default function EntryForm({
   const accent = useUIStore((s) => s.theme_heavy);
   const [local, setLocal] = useState<EntryDraft | null>(draft);
   const [pickerOpen, setPickerOpen] = useState(false);
+  const [showStartPicker, setShowStartPicker] = useState(false);
+  const [showEndPicker, setShowEndPicker] = useState(false);
 
-  // 부모가 새 draft를 내려보내면 로컬 상태를 동기화
   useEffect(() => {
     if (draft) setLocal(draft);
   }, [draft]);
@@ -89,6 +109,34 @@ export default function EntryForm({
 
   const update = (patch: Partial<EntryDraft>) => {
     setLocal((prev) => (prev ? { ...prev, ...patch } : prev));
+  };
+
+  const isRange = !!(local.start_date && local.end_date);
+  const onToggleRange = (enabled: boolean) => {
+    if (enabled) {
+      update({ start_date: entryDate, end_date: entryDate });
+    } else {
+      update({ start_date: undefined, end_date: undefined });
+    }
+  };
+
+  const onPickStart = (_event: DateTimePickerEvent, selected?: Date) => {
+    setShowStartPicker(Platform.OS === 'ios'); // iOS는 인라인이라 직접 닫을 때까지 유지
+    if (!selected) return;
+    const next = format(selected, 'yyyy-MM-dd');
+    // end가 새 start보다 빠르면 end도 자동으로 맞춰줌
+    const fixedEnd =
+      local.end_date && local.end_date < next ? next : local.end_date ?? next;
+    update({ start_date: next, end_date: fixedEnd });
+  };
+
+  const onPickEnd = (_event: DateTimePickerEvent, selected?: Date) => {
+    setShowEndPicker(Platform.OS === 'ios');
+    if (!selected) return;
+    const next = format(selected, 'yyyy-MM-dd');
+    // end가 start보다 빠르면 start로 끌어올림
+    const fixedEnd = local.start_date && next < local.start_date ? local.start_date : next;
+    update({ end_date: fixedEnd });
   };
 
   const locationLabel = local.location
@@ -190,6 +238,59 @@ export default function EntryForm({
               {local.location ? '위치 변경' : '위치 선택'}
             </Text>
           </Pressable>
+
+          {/* todo 전용: 기간 */}
+          {local.type === 'todo' && (
+            <>
+              <View className="flex-row items-center justify-between mb-2">
+                <Text className="text-xs text-gray-500">기간으로 설정</Text>
+                <Switch value={isRange} onValueChange={onToggleRange} />
+              </View>
+
+              {isRange && (
+                <View className="mb-4">
+                  <View className="flex-row items-center mb-2">
+                    <Text className="text-xs text-gray-500 w-14">시작</Text>
+                    <Pressable
+                      onPress={() => setShowStartPicker(true)}
+                      className="flex-1 ml-2 p-3 rounded-lg bg-gray-50 active:opacity-70 flex-row items-center"
+                    >
+                      <Ionicons name="calendar-outline" size={16} color="#666" />
+                      <Text className="ml-2 text-sm text-gray-800">{local.start_date}</Text>
+                    </Pressable>
+                  </View>
+                  <View className="flex-row items-center">
+                    <Text className="text-xs text-gray-500 w-14">종료</Text>
+                    <Pressable
+                      onPress={() => setShowEndPicker(true)}
+                      className="flex-1 ml-2 p-3 rounded-lg bg-gray-50 active:opacity-70 flex-row items-center"
+                    >
+                      <Ionicons name="calendar-outline" size={16} color="#666" />
+                      <Text className="ml-2 text-sm text-gray-800">{local.end_date}</Text>
+                    </Pressable>
+                  </View>
+
+                  {showStartPicker && (
+                    <DateTimePicker
+                      value={safeParse(local.start_date, new Date())}
+                      mode="date"
+                      display="default"
+                      onChange={onPickStart}
+                    />
+                  )}
+                  {showEndPicker && (
+                    <DateTimePicker
+                      value={safeParse(local.end_date, new Date())}
+                      mode="date"
+                      display="default"
+                      minimumDate={local.start_date ? safeParse(local.start_date, new Date()) : undefined}
+                      onChange={onPickEnd}
+                    />
+                  )}
+                </View>
+              )}
+            </>
+          )}
 
           {local.type === 'anniversary' && (
             <>
