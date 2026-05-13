@@ -112,6 +112,7 @@ const DraggableEntry = React.memo<{activate: boolean, item: EntryItem; date: str
     const bgColor = item.color;
     const s: React.CSSProperties = {
       opacity: isDragging ? 0.3 : 1,
+      textBox: 'auto',
       borderLeft: isRange && !isStart ? 'none' : `4px solid ${bgColor}`,
       backgroundColor: bgColor + '90',
       color: theme === 'dark' ? 'white' : 'black',
