@@ -23,7 +23,7 @@ import DiaryModal from '../Modal/DailyList/DiaryModal';
 import YearMonthPicker from './YearMonthPicker';
 import { useUIStore } from '@project/shared/src/store/uiStore';
 import styles from './Diary.module.css';
-import { ANNIVERSARY_ICONS } from '@project/shared/src/constants/anniversary';
+import { ANNIVERSARY_ICONS } from '../../../icons/anniversary';
 import clsx from 'clsx';
 
 /**

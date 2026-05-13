@@ -4,7 +4,7 @@ import { Map, MapMarker } from 'react-kakao-maps-sdk';
 import { type EntryItem } from '@project/shared/src/store/diaryStore';
 import { formatDateWithDay } from '@project/shared/src/utils/dateUtils';
 import './SideDetailModal.css';
-import { ANNIVERSARY_ICONS } from '@project/shared/src/constants/anniversary';
+import { ANNIVERSARY_ICONS } from '../../icons/anniversary';
 
 interface TodoDetailModalProps {
   item: EntryItem;

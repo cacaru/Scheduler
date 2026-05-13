@@ -1,6 +1,6 @@
 import React from 'react';
 import MiniCalendar from '../../../common/MiniCalendar/MiniCalendar';
-import { ICONS } from '@project/shared/src/constants/anniversary';
+import { ICONS } from '../../../../icons/anniversary';
 import { ANNI_COLORS as COLORS } from '@project/shared/src/constants/colors';
 
 interface AnniversaryFormLeftProps {

@@ -3,7 +3,7 @@ import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import { Trash2, Book, Check, GripVertical, Gift } from 'lucide-react';
 import { type EntryItem } from '@project/shared/src/store/diaryStore';
-import { ANNIVERSARY_ICONS } from '@project/shared/src/constants/anniversary';
+import { ANNIVERSARY_ICONS } from '../../../../icons/anniversary';
 
 /**
  * SortableEntryCard.tsx
