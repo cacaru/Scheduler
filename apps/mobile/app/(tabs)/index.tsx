@@ -5,10 +5,10 @@ import { Calendar, LocaleConfig, type DateData } from 'react-native-calendars';
 import { useRouter } from 'expo-router';
 import { format } from 'date-fns';
 
-import { useDiaryStore, type EntryItem } from '@project/shared/src/store/diaryStore';
+import { useDiaryStore } from '@project/shared/src/store/diaryStore';
 import { useUIStore } from '@project/shared/src/store/uiStore';
-import { formatDateWithDay } from '@project/shared/src/utils/dateUtils';
-import { Section, getRecurringAnniversariesForDate } from '../../components/EntrySections';
+import { getRecurringAnniversariesForDate } from '../../components/EntrySections';
+import TodayPreview from '../../components/TodayPreview';
 
 LocaleConfig.locales['ko'] = {
   monthNames: ['1월', '2월', '3월', '4월', '5월', '6월', '7월', '8월', '9월', '10월', '11월', '12월'],
@@ -43,6 +43,20 @@ export default function CalendarScreen() {
   const todayDiaries = useMemo(() => todayItems.filter((i) => i.type === 'diary'), [todayItems]);
   const todayTodos = useMemo(() => todayItems.filter((i) => i.type === 'todo'), [todayItems]);
 
+  // 통합 리스트 (표시 순서: 기념일 → 일기 → 할일)
+  const todayCombined = useMemo(
+    () => [...todayAnniversaries, ...todayDiaries, ...todayTodos],
+    [todayAnniversaries, todayDiaries, todayTodos]
+  );
+  const todayCounts = useMemo(
+    () => ({
+      anniversary: todayAnniversaries.length,
+      diary: todayDiaries.length,
+      todo: todayTodos.length,
+    }),
+    [todayAnniversaries, todayDiaries, todayTodos]
+  );
+
   // 캘린더 마커
   const markedDates = useMemo(() => {
     const result: Record<string, any> = {};
@@ -72,12 +86,8 @@ export default function CalendarScreen() {
     router.push(`/day/${day.dateString}` as never);
   };
 
-  // 섹션 콜백 — 모두 오늘 day 화면으로 이동 (상세 편집은 거기서)
+  // 오늘 위젯 콜백
   const goToToday = () => router.push(`/day/${today}` as never);
-  const onSectionAdd = () => goToToday();
-  const onItemEdit = (_item: EntryItem) => goToToday();
-  // 체크박스 토글은 인라인 (스토어 액션 직접 호출 — 즉시 반영)
-  const onItemToggleTodo = (item: EntryItem) => toggleTodo(today, item.id);
 
   return (
     <SafeAreaView className="flex-1 bg-white" edges={['top']}>
@@ -109,35 +119,15 @@ export default function CalendarScreen() {
         <LegendDot color="#fd0" label="기념일(배경)" />
       </View>
 
-      {/* 하단: 오늘 항목 (캘린더는 고정, 이 영역만 스크롤) */}
-      <ScrollView className="flex-1" contentContainerStyle={{ paddingBottom: 24 }}>
-        <View className="px-4 pt-4 pb-1">
-          <Text className="text-base font-semibold text-gray-800">
-            오늘 — {formatDateWithDay(today)}
-          </Text>
-        </View>
-
-        <Section
-          type="anniversary"
-          items={todayAnniversaries}
-          dayDate={today}
-          onAdd={onSectionAdd}
-          onEdit={onItemEdit}
-        />
-        <Section
-          type="diary"
-          items={todayDiaries}
-          dayDate={today}
-          onAdd={onSectionAdd}
-          onEdit={onItemEdit}
-        />
-        <Section
-          type="todo"
-          items={todayTodos}
-          dayDate={today}
-          onAdd={onSectionAdd}
-          onEdit={onItemEdit}
-          onToggleTodo={onItemToggleTodo}
+      {/* 하단: 오늘 위젯 카드 (캘린더는 고정, 이 영역만 스크롤) */}
+      <ScrollView className="flex-1" contentContainerStyle={{ paddingBottom: 12 }}>
+        <TodayPreview
+          date={today}
+          items={todayCombined}
+          counts={todayCounts}
+          onOpenDay={goToToday}
+          onItemTap={goToToday}
+          onToggleTodo={(item) => toggleTodo(today, item.id)}
         />
       </ScrollView>
     </SafeAreaView>
