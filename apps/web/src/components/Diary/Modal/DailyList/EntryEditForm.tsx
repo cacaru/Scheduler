@@ -74,10 +74,13 @@ const EntryEditForm: React.FC<EntryEditFormProps> = ({
         <button className="icon-btn" onClick={onClose}><CloseIcon size={20} /></button>
       </div>
       <div className="modal-body scrollable">
-        <div className="form-tabs">
-          <button className={`type-btn ${type === 'diary' ? 'active' : ''}`} onClick={() => setType('diary')} disabled={isEditing}>일기</button>
-          <button className={`type-btn ${type === 'todo' ? 'active' : ''}`} onClick={() => setType('todo')} disabled={isEditing}>할 일</button>
-        </div>
+        {isEditing ? <></> :
+          <div className="form-tabs">
+            <button className={`type-btn ${type === 'diary' ? 'active' : ''}`} onClick={() => setType('diary')} disabled={isEditing}>일기</button>
+            <button className={`type-btn ${type === 'todo' ? 'active' : ''}`} onClick={() => setType('todo')} disabled={isEditing}>할 일</button>
+          </div>
+        }
+        
 
         <div className="form-section-label">기록 테마</div>
         <div className="color-palette-box simple">
