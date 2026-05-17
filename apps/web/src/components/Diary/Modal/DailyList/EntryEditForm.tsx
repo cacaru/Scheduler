@@ -53,7 +53,7 @@ const EntryEditForm: React.FC<EntryEditFormProps> = ({
   }, [isOpen, currentDate]);
 
   const titleText = isEditing 
-    ? (type === 'diary' ? '일기 수정' : '할 일 수정') 
+    ? (type === 'diary' ? '일기 수정' : (type === 'todo' ? '할 일 수정' : '기념일 수정')) 
     : (type === 'diary' ? '새 일기' : '새 할 일');
 
   return (
